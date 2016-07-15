@@ -26,7 +26,7 @@ def check_blockers():
     FNULL = open(os.devnull, 'w')
     ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)
     if ret > 0:
-        print "You have updates available! Please install all updates first"
+        print "INPLACERISK: EXTREME: You have updates available! Please install all updates first"
 
     # We have to set these ones when calling assitant checkers outside the assistant
     os.environ["XCCDF_RESULT_FAIL"] = "1"
