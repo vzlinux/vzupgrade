@@ -24,15 +24,21 @@ that check for upgrade blockers
 '''
 def check_blockers():
     FNULL = open(os.devnull, 'w')
-    ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)# >/dev/null
+    ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)
     if ret > 0:
         print "You have updates available! Please install all updates first"
 
-    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzfs/check.sh'])
-    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'])
+    # We have to set these ones when calling assitant checkers outside the assistant
+    os.environ["XCCD_RESULT_FAIL"] = "1"
+    os.environ["XCCD_RESULT_PASS"] = "0"
+    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzfs/check.sh'], env=os.environ)
+    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzrelease/check.sh'], env=os.environ)
+    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'], env=os.environ)
 
     if ret == 0:
-        print "Noupgrade blockers found!"
+        print "No upgrade blockers found!"
+    else:
+        print "Critical blockers found, please fix them before trying to upgrade"
 
 '''
 Actually run upgrade by means of redhat-upgrade-tool
