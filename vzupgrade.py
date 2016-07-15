@@ -47,8 +47,12 @@ Preliminary launch preupgrade-assistant if it has not been launched yet
 def install():
     if not os.path.isdir("/root/preupgrade"):
         print "It looks like preupgrade check was not performed, launching..."
+        cmdline.blocker = False
         check()
-    subprocess.call(['redhat-upgrade-tool'])
+    if cmdline.device:
+        subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device])
+    elif cmdline.network:
+        subprocess.call(['redhat-upgrade-tool', '--network', cmdline.network])
 
 def list_prereq():
     print "=== Virtuozzo-specifi upgrade prerequisites: ==="
@@ -70,7 +74,9 @@ def parse_command_line():
     sp.set_defaults(func=list_prereq)
 
     sp = subparsers.add_parser('install', help='Perform upgrade')
-    sp.add_argument('--source', action='store', nargs='?', help='source to be used')
+    src_group = sp.add_mutually_exclusive_group()
+    src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
+    src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
     sp.set_defaults(func=install)
 
     cmdline = parser.parse_args(sys.argv[1:])
