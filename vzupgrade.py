@@ -74,7 +74,7 @@ def parse_command_line():
     sp.set_defaults(func=list_prereq)
 
     sp = subparsers.add_parser('install', help='Perform upgrade')
-    src_group = sp.add_mutually_exclusive_group()
+    src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
     sp.set_defaults(func=install)
