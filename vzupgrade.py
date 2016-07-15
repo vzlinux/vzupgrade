@@ -29,8 +29,8 @@ def check_blockers():
         print "You have updates available! Please install all updates first"
 
     # We have to set these ones when calling assitant checkers outside the assistant
-    os.environ["XCCD_RESULT_FAIL"] = "1"
-    os.environ["XCCD_RESULT_PASS"] = "0"
+    os.environ["XCCDF_RESULT_FAIL"] = "1"
+    os.environ["XCCDF_RESULT_PASS"] = "0"
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzfs/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzrelease/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'], env=os.environ)
