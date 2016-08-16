@@ -50,14 +50,15 @@ def install():
         cmdline.blocker = False
         check()
     if cmdline.device:
-        subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device])
+        subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post'])
     elif cmdline.network:
-        subprocess.call(['redhat-upgrade-tool', '--network', cmdline.network])
+        subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post'])
 
 def list_prereq():
     print "=== Virtuozzo-specifi upgrade prerequisites: ==="
     print "* No VMs exist on the host"
     print "* There are no containers that use VZFS"
+    print "* There are no templates for OSes not supported by Vz7"
     print "* All updates are installed"
 
 
