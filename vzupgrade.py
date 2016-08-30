@@ -53,7 +53,7 @@ def install():
 
     if cmdline.boot:
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
-            cfg_file.write("grub2-mkconfig -O /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log")
+            cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
     if cmdline.device:
