@@ -57,9 +57,15 @@ def install():
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
     if cmdline.device:
-        subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post'])
+        if cmdline.reboot:
+            subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
+        else:
+            subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post'])
     elif cmdline.network:
-        subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post'])
+        if cmdline.reboot:
+            subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post', '--reboot'])
+        else:
+            subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post'])
 
 def list_prereq():
     print "=== Virtuozzo-specific upgrade prerequisites: ==="
@@ -83,6 +89,7 @@ def parse_command_line():
 
     sp = subparsers.add_parser('install', help='Perform upgrade')
     sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
+    sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
     src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
