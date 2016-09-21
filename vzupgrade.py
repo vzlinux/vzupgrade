@@ -56,6 +56,12 @@ def install():
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
+    # Clean up rpm __db* files - they can break update process
+    for root, dirs, files in os.walk('/var/lib/rpm/__db*'):
+        for f in files:
+            if f.startswith("__db"):
+                os.remove("/var/lib/rpm/" + f)
+
     if cmdline.device:
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
