@@ -62,6 +62,8 @@ def install():
             if f.startswith("__db"):
                 os.remove("/var/lib/rpm/" + f)
 
+    subprocess.call(['preupgrade-pstorage'])
+
     if cmdline.device:
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
