@@ -63,6 +63,9 @@ def install():
                 os.remove("/var/lib/rpm/" + f)
 
     subprocess.call(['preupgrade-pstorage'])
+    # It's ot enough for us to have grep in "downgraded" list, we want to update it before
+    # that list is processed. So downgrade it to the released version first.
+    subprocess.call(['yum', 'downgrade', '-y', '--disablerepo', 'virtuozzolinux-updates', 'grep'])
 
     if cmdline.device:
         if cmdline.reboot:
