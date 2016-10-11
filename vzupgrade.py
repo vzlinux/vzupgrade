@@ -31,10 +31,13 @@ def check_blockers():
     # We have to set these ones when calling assitant checkers outside the assistant
     os.environ["XCCDF_RESULT_FAIL"] = "1"
     os.environ["XCCDF_RESULT_PASS"] = "0"
+    os.environ["XCCDF_VALUE_TMP_PREUPGRADE"] = "/root/preupgrade"
+    os.environ["XCCDF_VALUE_SOLUTION_FILE"] = "solution.txt"
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzfs/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzrelease/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/ez-templates/check.sh'], env=os.environ)
+    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/storage/pstorage/check.py'], env=os.environ)
 
     if ret == 0:
         print "No upgrade blockers found!"
