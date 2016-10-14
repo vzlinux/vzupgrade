@@ -70,7 +70,11 @@ def install():
     # that list is processed. So downgrade it to the released version first.
     subprocess.call(['yum', 'downgrade', '-y', '--disablerepo', 'virtuozzolinux-updates', 'grep'])
 
+    subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
+
     if cmdline.device:
+        subprocess.call(['cp', '-r', cmdline.device + "/Packages/", '/var/lib/upgrade_pkgs'])
+        subprocess.call(['cp', '-r', cmdline.device + "/repodata/", '/var/lib/upgrade_pkgs'])
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
         else:
