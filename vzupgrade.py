@@ -7,6 +7,7 @@ import tempfile
 import os
 import time
 import shutil
+import re
 
 '''
 Check upgrade prerequisites - run preupgrade-assistant
@@ -80,6 +81,13 @@ def install():
         else:
             subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post'])
     elif cmdline.network:
+        # Cound number of folders to be cut in address
+        # (when passing argument to --cut-dirs wget option)
+        net_target = re.sub(r'.*://', '', cmdline.network)
+        net_target = re.sub(r'/$', '', net_target)
+        target_folders = net_target.split("/")
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post', '--reboot'])
         else:
