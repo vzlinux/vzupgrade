@@ -71,6 +71,18 @@ def install():
     # that list is processed. So downgrade it to the released version first.
     subprocess.call(['yum', 'downgrade', '-y', '--disablerepo', 'virtuozzolinux-updates', 'grep'])
 
+    # Disable our repos since sometimes yum manages to pick up packages from there
+    # during upgrade
+    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-updates'])
+    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-base'])
+    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo'])
+    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo-updates'])
+
+    # Remove vzcreaterepo since it is not updated by anything in Vz7
+    # but depends on createrepo which in turn depends on python-2.6
+    # Due to this yum can try to look for python-2.6 during upgrade
+    subprocess.call(['yum', 'remove', '-y', 'vzcreaterepo', 'createrepo'])
+
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
     if cmdline.device:
