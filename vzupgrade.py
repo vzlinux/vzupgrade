@@ -8,6 +8,7 @@ import os
 import time
 import shutil
 import re
+from lxml import etree
 
 '''
 Check upgrade prerequisites - run preupgrade-assistant
@@ -44,6 +45,38 @@ def check_blockers():
         print "No upgrade blockers found!"
     else:
         print "Critical blockers found, please fix them before trying to upgrade"
+
+'''
+repomd.xml on iso doesn't contain build id
+Let's add it on the basis of .discinfo file
+'''
+def fix_repomd():
+    try:
+        f = open("/var/lib/upgrade_pkgs/.discinfo", "r")
+        for  l in f.readlines():
+            if not l.startswith("Virtuozzo"):
+                continue
+            buildid = l.replace("Virtuozzo ", "").rstrip()
+            break
+        f.close()
+            
+        tree = etree.parse("/var/lib/upgrade_pkgs/repodata/repomd.xml")
+        repoid = etree.Element("tags")
+        content = etree.Element("content")
+        content.text = "binary-x86_64"
+        distro = etree.Element("distro", cpeid="cpe:/o:virtuozzoproject:vz:7")
+        distro.text = buildid
+        repoid.insert(0, content)
+        repoid.insert(1, distro)
+        tree.getroot().insert(1, repoid)
+    
+        f = open("/var/lib/upgrade_pkgs/repodata/repomd.xml", "w")
+        f.write(etree.tostring(tree.getroot()))
+        f.close()
+    except:
+        print("Failed to set build id for the upgrde system, /etc/virtuozzo release may contain a dummy build number.")
+        pass
+
 
 '''
 Actually run upgrade by means of redhat-upgrade-tool
@@ -88,6 +121,8 @@ def install():
     if cmdline.device:
         subprocess.call(['cp', '-r', cmdline.device + "/Packages/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', '-r', cmdline.device + "/repodata/", '/var/lib/upgrade_pkgs'])
+        subprocess.call(['cp', cmdline.device + "/.discinfo", '/var/lib/upgrade_pkgs'])
+        fix_repomd()
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
         else:
@@ -100,6 +135,9 @@ def install():
         target_folders = net_target.split("/")
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
+
+        fix_repomd()
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post', '--reboot'])
         else:
@@ -139,3 +177,4 @@ def parse_command_line():
 if __name__ == '__main__':
     parse_command_line()
     cmdline.func()
+
