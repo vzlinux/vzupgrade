@@ -8,6 +8,7 @@ import os
 import time
 import shutil
 import re
+import fileinput
 from lxml import etree
 
 '''
@@ -93,6 +94,16 @@ def install():
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
+    if cmdline.skip_post_update:
+        cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
+        for line in cfg_file:
+            if line.startswith("yum update"):
+                print(line.replace("yum update", "#yum update").rstrip())
+            elif line.startswith("yum distro-sync --disablerepo=factory"):
+                print(line.replace("yum distro-sync --disablerepo=factory", "#yum distro-sync --disablerepo=factory").rstrip())
+            else:
+                print line.rstrip()
+
     # Clean up rpm __db* files - they can break update process
     for root, dirs, files in os.walk('/var/lib/rpm/__db*'):
         for f in files:
@@ -166,6 +177,7 @@ def parse_command_line():
     sp = subparsers.add_parser('install', help='Perform upgrade')
     sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
     sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
+    sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed')
     src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
