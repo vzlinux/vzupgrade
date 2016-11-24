@@ -34,6 +34,8 @@ def check_blockers():
     # We have to set these ones when calling assitant checkers outside the assistant
     os.environ["XCCDF_RESULT_FAIL"] = "1"
     os.environ["XCCDF_RESULT_PASS"] = "0"
+    # pstorage upgrade script uses this as an exit code in case of failure
+    os.environ["XCCDF_RESULT_INFORMATIONAL"] = "2"
     os.environ["XCCDF_VALUE_TMP_PREUPGRADE"] = "/root/preupgrade"
     os.environ["XCCDF_VALUE_SOLUTION_FILE"] = "solution.txt"
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzfs/check.sh'], env=os.environ)
