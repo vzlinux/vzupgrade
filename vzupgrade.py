@@ -106,6 +106,22 @@ def install():
             else:
                 print line.rstrip()
 
+    if cmdline.skip_license_upgrade:
+        print('WARNING: Skipping license upgrade. You will not be able to launch any VM or container in the upgraded system until you enter a valid license!')
+        cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
+        for line in cfg_file:
+            if line.startswith("vzlicupdate -n"):
+                print(line.replace("vzlicupdate -n", "#vzlicupdate -n").rstrip())
+            else:
+                print line.rstrip()
+    elif cmdline.license:
+        cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
+        for line in cfg_file:
+            if line.startswith("vzlicupdate -n"):
+                print(line.replace("vzlicupdate -n", "vzlicload -p " + cmdline.license).rstrip())
+            else:
+                print line.rstrip()
+
     # Clean up rpm __db* files - they can break update process
     for root, dirs, files in os.walk('/var/lib/rpm/__db*'):
         for f in files:
@@ -183,6 +199,10 @@ def parse_command_line():
     src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
+    lic_group = sp.add_mutually_exclusive_group(required=True)
+    lic_group.add_argument('--license', action='store', help='license key for Virtuozzo 7 to be installed into upgraded system')
+    lic_group.add_argument('--skip-license-upgrade', action='store_true',
+                            help='Skip license upgrade. WARNING: You will not be able to launch any VM or container in the upgraded system until you enter a valid license!')
     sp.set_defaults(func=install)
 
     cmdline = parser.parse_args(sys.argv[1:])
