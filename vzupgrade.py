@@ -22,6 +22,16 @@ def check():
         subprocess.call(['preupg'])
 
 '''
+Check if we have VM backups and notify about new backup location if yes
+'''
+def check_vm_backups():
+    if os.path.exists("/var/parallels/backups") and os.path.isdir("/var/parallels/backups"):
+        if os.listdir("/var/parallels/backups"):
+            print "WARNING: We have detected that /var/parallels/backups folder is not empty."
+            print "         In Virtuozzo 7 default location for VM backups has been changed to /vz/vmprivate/backups."
+            print "         If you want to use your backups after upgrade, you will have to move them to the new location manually."
+
+'''
 Explicitely launch VZ-specific preupgrade-assistant checkers
 that check for upgrade blockers
 '''
@@ -44,6 +54,8 @@ def check_blockers():
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/ez-templates/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/storage/pstorage/check.py'], env=os.environ)
 
+    check_vm_backups()
+
     if ret == 0:
         print "No upgrade blockers found!"
     else:
@@ -62,7 +74,7 @@ def fix_repomd():
             buildid = l.replace("Virtuozzo ", "").rstrip()
             break
         f.close()
-            
+
         tree = etree.parse("/var/lib/upgrade_pkgs/repodata/repomd.xml")
         repoid = etree.Element("tags")
         content = etree.Element("content")
@@ -72,7 +84,7 @@ def fix_repomd():
         repoid.insert(0, content)
         repoid.insert(1, distro)
         tree.getroot().insert(1, repoid)
-    
+
         f = open("/var/lib/upgrade_pkgs/repodata/repomd.xml", "w")
         f.write(etree.tostring(tree.getroot()))
         f.close()
@@ -167,6 +179,10 @@ def install():
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
         fix_repomd()
+
+        # Dump a warning about VM backup location
+        check_vm_backups()
+
         if cmdline.reboot:
             subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post', '--reboot'])
         else:
