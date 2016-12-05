@@ -160,6 +160,21 @@ def install():
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
     if cmdline.device:
+        if cmdline.device.startswith("/dev") and os.path.isfile(cmdline.device):
+            tmpfolder = tempfile.mkdtemp()
+            ret = subprocess.call(['mount', cmdline.device, tmpfolder])
+            if ret > 0:
+                print "Tried to mount " + cmdline.device + " but failed"
+                sys.exit(1)
+            cmdline.device = tmpfolder
+        elif cmdline.device.endswith(".iso") and os.path.isfile(cmdline.device):
+            tmpfolder = tempfile.mkdtemp()
+            ret = subprocess.call(['mount', '-o', 'loop', cmdline.device, tmpfolder])
+            if ret > 0:
+                print "Tried to mount " + cmdline.device + " but failed"
+                sys.exit(1)
+            cmdline.device = tmpfolder
+
         subprocess.call(['cp', '-r', cmdline.device + "/Packages/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', '-r', cmdline.device + "/repodata/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', cmdline.device + "/.discinfo", '/var/lib/upgrade_pkgs'])
