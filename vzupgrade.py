@@ -52,6 +52,7 @@ def check_blockers():
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzrelease/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/ez-templates/check.sh'], env=os.environ)
+    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/pva-packages/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/storage/pstorage/check.py'], env=os.environ)
 
     check_vm_backups()
@@ -209,6 +210,7 @@ def list_prereq():
     print "* There are no containers that use VZFS"
     print "* There are no templates for OSes not supported by Vz7"
     print "* All updates are installed"
+    print "* No Virtuozzo Automation packages are installed"
 
 
 def parse_command_line():
