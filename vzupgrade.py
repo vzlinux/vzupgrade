@@ -16,9 +16,9 @@ Check upgrade prerequisites - run preupgrade-assistant
 or only its parts if '--blocker' option is specified
 '''
 def check():
-    if cmdline.blocker:
-        check_blockers()
-    else:
+    if check_blockers() > 0:
+        sys.exit(1)
+    if not cmdline.blocker:
         subprocess.call(['preupg'])
 
 '''
@@ -59,8 +59,10 @@ def check_blockers():
 
     if ret == 0:
         print "No upgrade blockers found!"
+        return 0
     else:
         print "Critical blockers found, please fix them before trying to upgrade"
+        return 1
 
 '''
 repomd.xml on iso doesn't contain build id
