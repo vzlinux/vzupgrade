@@ -160,6 +160,8 @@ def install():
     # Due to this yum can try to look for python-2.6 during upgrade
     subprocess.call(['yum', 'remove', '-y', 'vzcreaterepo', 'createrepo'])
 
+    subprocess.call(['rm', '-rf', '/var/lib/upgrade_pkgs'])
+    subprocess.call(['rm', '-rf', '/var/tmp/system-upgrade'])
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
     if cmdline.device:
