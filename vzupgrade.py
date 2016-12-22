@@ -111,6 +111,11 @@ def install():
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
+    # Enable sshd if it was enabled in Vz6
+    if 'sshd' in open("/root/preupgrade/Virtuozzo6_7/system/initscripts/control/enabled.log").read():
+        with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
+            cfg_file.write("systemctl enable sshd 2>&1 | tee -a /var/log/vzupgrade.log\n")
+
     if cmdline.skip_post_update:
         cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
         for line in cfg_file:
