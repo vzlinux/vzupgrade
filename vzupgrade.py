@@ -146,7 +146,10 @@ def install():
     subprocess.call(['preupgrade-pstorage'])
     # It's ot enough for us to have grep in "downgraded" list, we want to update it before
     # that list is processed. So downgrade it to the released version first.
-    subprocess.call(['yum', 'downgrade', '-y', '--disablerepo', 'virtuozzolinux-updates', 'grep'])
+    # Actually this doesn't seem to be required after VzLinux updated to 7.3,
+    # but let's leave for safety, just hide the output
+    FNULL = open(os.devnull, 'w')
+    subprocess.call(['yum', 'downgrade', '-y', '--disablerepo', 'virtuozzolinux-updates', 'grep'], stdout=FNULL, stderr=FNULL)
 
     # Disable our repos since sometimes yum manages to pick up packages from there
     # during upgrade
@@ -219,7 +222,7 @@ def list_prereq():
 
 def parse_command_line():
     global cmdline
-    parser = argparse.ArgumentParser(description="Virtuozzo Upgrade Tool")
+    parser = argparse.ArgumentParser(description="Virtuozzo Upgrade Tool. Please launch 'vzupgrade <cmd> --help' to get help for a particular command")
     subparsers = parser.add_subparsers(title='command')
 
     sp = subparsers.add_parser('check', help='check upgrade prerequisites and generate upgrade scripts')
