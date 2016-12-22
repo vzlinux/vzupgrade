@@ -165,7 +165,7 @@ def install():
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
     if cmdline.device:
-        if cmdline.device.startswith("/dev") and os.path.isfile(cmdline.device):
+        if cmdline.device.startswith("/dev"):
             tmpfolder = tempfile.mkdtemp()
             ret = subprocess.call(['mount', cmdline.device, tmpfolder])
             if ret > 0:
