@@ -116,6 +116,13 @@ def install():
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
             cfg_file.write("systemctl enable sshd 2>&1 | tee -a /var/log/vzupgrade.log\n")
 
+    if cmdline.disable_rk_autoupdate:
+        with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
+            cfg_file.write("/sbin/readykernel autoupdate disable 2>&1 | tee -a /var/log/vzupgrade.log\n")
+    else:
+        with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
+            cfg_file.write("/sbin/readykernel autoupdate enable 2>&1 | tee -a /var/log/vzupgrade.log\n")
+
     if cmdline.skip_post_update:
         cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
         for line in cfg_file:
@@ -241,6 +248,7 @@ def parse_command_line():
     sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
     sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
     sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed')
+    sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
     src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
