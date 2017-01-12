@@ -52,7 +52,6 @@ def check_blockers():
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/vzrelease/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/prlctl/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/ez-templates/check.sh'], env=os.environ)
-    ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/system/pva-packages/check.sh'], env=os.environ)
     ret += subprocess.call(['/usr/share/preupgrade/Virtuozzo6_7/storage/pstorage/check.py'], env=os.environ)
 
     check_vm_backups()
@@ -92,8 +91,28 @@ def fix_repomd():
         f.write(etree.tostring(tree.getroot()))
         f.close()
     except:
-        print("Failed to set build id for the upgrde system, /etc/virtuozzo release may contain a dummy build number.")
+        print("Failed to set build id for the upgraded system, /etc/virtuozzo release may contain a dummy build number.")
         pass
+
+
+'''
+Check if PVA is installed and add routines for its upgrade if yes
+'''
+def update_pva():
+    pva_detected = False
+    proc = subprocess.Popen(["rpm", "-qa"], stdout=subprocess.PIPE)
+    for line in iter(proc.stdout.readline, ''):
+        if line is not None and line.startswith("pva-"):
+            pva_detected = True
+
+    if pva_detected:
+        subprocess.call(['/etc/init.d/pvapp', 'stop'])
+        subprocess.call(['/etc/init.d/pvaagentd', 'stop'])
+        with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
+            cfg_file.write("rpm -qa pva* | xargs yum remove -y 2>&1 | tee -a /var/log/vzupgrade.log\n")
+            cfg_file.write("rm -rf /var/opt/pva/setup 2>&1 | tee -a /var/log/vzupgrade.log\n")
+            cfg_file.write("wget http://repo.virtuozzo.com/va-agent/deploy-va-agent/deploy-va-agent -O /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
+            cfg_file.write("sh /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
 
 
 '''
@@ -148,6 +167,8 @@ def install():
                 print(line.replace("vzlicupdate -n", "vzlicload -p " + cmdline.license).rstrip())
             else:
                 print line.rstrip()
+
+    update_pva()
 
     # Clean up rpm __db* files - they can break update process
     for root, dirs, files in os.walk('/var/lib/rpm/__db*'):
@@ -264,4 +285,3 @@ def parse_command_line():
 if __name__ == '__main__':
     parse_command_line()
     cmdline.func()
-
