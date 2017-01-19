@@ -186,10 +186,12 @@ def install():
 
     # Disable our repos since sometimes yum manages to pick up packages from there
     # during upgrade
-    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-updates'])
-    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-base'])
-    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo'])
-    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo-updates'])
+#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-updates'])
+#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-base'])
+#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo'])
+#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo-updates'])
+    subprocess.call(['mv', '/etc/yum.repos.d', '/etc/yum.repos.d.orig'])
+    subprocess.call(['mkdir', '/etc/yum.repos.d'])
 
     # Remove vzcreaterepo since it is not updated by anything in Vz7
     # but depends on createrepo which in turn depends on python-2.6
