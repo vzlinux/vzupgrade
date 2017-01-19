@@ -186,6 +186,8 @@ def install():
 
     # Disable our repos since sometimes yum manages to pick up packages from there
     # during upgrade
+    # Note that redhat-upgrade-tool scans disabled repos during upgrade. So just move
+    # repo files out of /etc/yum.repos.d
 #    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-updates'])
 #    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-base'])
 #    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo'])
