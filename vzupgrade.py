@@ -106,6 +106,15 @@ def update_pva():
             pva_detected = True
 
     if pva_detected:
+        subprocess.call(['rm', '-rf', '/var/lib/pva_upgrade'])
+        subprocess.call(['mkdir', '-p', '/var/lib/pva_upgrade'])
+        if os.path.isfile("/var/opt/pva/agent/etc/eid"):
+            subprocess.call(['cp', "/var/opt/pva/agent/etc/eid", '/var/lib/pva_upgrade/'])
+        if os.path.isfile("/var/opt/pva/agent/etc/vzagent.conf"):
+            subprocess.call(['cp', "/var/opt/pva/agent/etc/vzagent.conf", '/var/lib/pva_upgrade/'])
+        if os.path.isfile("/etc/opt/pva/pp/plugins/httpd/include.ssl.conf"):
+            subprocess.call(['cp', "/etc/opt/pva/pp/plugins/httpd/include.ssl.conf", '/var/lib/pva_upgrade/'])
+
         subprocess.call(['/etc/init.d/pvapp', 'stop'])
         subprocess.call(['/etc/init.d/pvaagentd', 'stop'])
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
