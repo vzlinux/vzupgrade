@@ -298,4 +298,7 @@ def parse_command_line():
 
 if __name__ == '__main__':
     parse_command_line()
-    cmdline.func()
+    try:
+        cmdline.func()
+    except KeyboardInterrupt:
+        sys.exit(0)
