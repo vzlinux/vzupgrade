@@ -214,6 +214,12 @@ def install():
     subprocess.call(['rm', '-rf', '/var/tmp/system-upgrade'])
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
+    # Save info about vlans
+    subprocess.call(['mkdir', '-p', '/var/lib/vzupgrade'])
+    netlist = open('/var/lib/vzupgrade/net_list', 'w')
+    subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
+    netlist.close();
+
     if cmdline.device:
         if cmdline.device.startswith("/dev"):
             tmpfolder = tempfile.mkdtemp()
