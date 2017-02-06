@@ -122,7 +122,7 @@ def update_pva():
             cfg_file.write("rm -rf /var/opt/pva/setup 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("wget http://repo.virtuozzo.com/va-agent/deploy-va-agent/deploy-va-agent -O /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("sh /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
-            cfg_file.write("prlctl delete 1 2>&1 | tee -a /var/log/vzupgrade.log\n")
+            cfg_file.write("echo 'prlctl delete 1' >> /var/lib/vzupgrade/vzupgrade-post\n")
 
 
 '''
