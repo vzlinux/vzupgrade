@@ -219,6 +219,9 @@ def install():
     netlist = open('/var/lib/vzupgrade/net_list', 'w')
     subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
     netlist.close();
+    iflist = open('/var/lib/vzupgrade/iflist', 'w')
+    subprocess.call(['ifconfig'], stdout=iflist)
+    iflist.close();
 
     if cmdline.device:
         if cmdline.device.startswith("/dev"):
