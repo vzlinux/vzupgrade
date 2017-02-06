@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cat /var/lib/vzupgrade/net_list | grep -v "^Bridged\|^Host-Only\|^Network ID" | while read net vtype device; do
+    hwaddr=`grep \$device /var/lib/vzupgrade/iflist | cut -f8 -d\  `
+    # Just process all interfaces with given HWaddr
+    grep $hwaddr /var/lib/vzupgrade/iflist | cut -f1 -d\  | while read realdev; do
+        prlsrvctl net add $net -i $realdev -t $vtype 2>&1 | tee -a /var/log/vzupgrade.log
+    done
+done
+

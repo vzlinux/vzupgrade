@@ -1,0 +1,10 @@
+[Unit]
+Description=VzUpgrade first-run service
+After=vz.service
+
+[Service]
+Type=oneshot
+ExecStart=/var/lib/vzupgrade/vzupgrade-post
+
+[Install]
+WantedBy=multi-user.target
