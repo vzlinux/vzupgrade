@@ -1,6 +1,10 @@
 [Unit]
 Description=VzUpgrade first-run service
-After=vz.service
+After=syslog.target network.target
+After=systemd-modules-load.service
+After=prl-disp.service
+Wants=systemd-modules-load.service
+Wants=prl-disp.service
 
 [Service]
 Type=oneshot
