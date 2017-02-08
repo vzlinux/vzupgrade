@@ -227,6 +227,9 @@ def install():
     subprocess.call(['ifconfig'], stdout=iflist)
     iflist.close();
 
+    # Save dispatcher config
+    subprocess.call(['cp', '/etc/parallels/dispatcher.xml', '/var/lib/vzupgrade'])
+
     if cmdline.device:
         if cmdline.device.startswith("/dev"):
             tmpfolder = tempfile.mkdtemp()
