@@ -122,11 +122,11 @@ def update_pva():
             cfg_file.write("rm -rf /var/opt/pva/setup 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("wget http://repo.virtuozzo.com/va-agent/deploy-va-agent/deploy-va-agent -O /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("sh /tmp/deploy-va-agent 2>&1 | tee -a /var/log/vzupgrade.log\n")
-            cfg_file.write("echo 'prlctl delete 1' >> /var/lib/vzupgrade/vzupgrade-post\n")
+            cfg_file.write("echo 'prlctl delete 1 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
 
     with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
-        cfg_file.write("echo 'systemctl disable vzupgrade' >> /var/lib/vzupgrade/vzupgrade-post\n")
-        cfg_file.write("echo 'rm -f /etc/systemd/system/vzupgrade.service' >> /var/lib/vzupgrade/vzupgrade-post\n")
+        cfg_file.write("echo 'systemctl disable vzupgrade 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
+        cfg_file.write("echo 'rm -f /etc/systemd/system/vzupgrade.service 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
 
 
 '''
