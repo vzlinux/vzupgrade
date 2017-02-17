@@ -4,7 +4,8 @@ WAIT_TIMEOUT=1
 MAX_RETRIES=20
 
 cat /var/lib/vzupgrade/net_list | grep -v "^Bridged\|^Host-Only\|^Network ID" | while read net vtype device; do
-    hwaddr=`grep \$device /var/lib/vzupgrade/iflist | cut -f8 -d\  `
+    hwaddr=`grep $device /var/lib/vzupgrade/iflist | awk '{print $5}' `
+    echo "Trying to restore network: $net ($vtype : $device : $hwaddr)" | tee -a /var/log/vzupgrade.log
     # Just process all interfaces with given HWaddr
     grep $hwaddr /var/lib/vzupgrade/iflist | cut -f1 -d\  | while read realdev; do
         retry=0
