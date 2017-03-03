@@ -128,6 +128,22 @@ def update_pva():
         cfg_file.write("echo 'systemctl disable vzupgrade 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
         cfg_file.write("echo 'rm -f /etc/systemd/system/vzupgrade.service 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
 
+'''
+Force all VEs to be stopped. We can't suspend them due to different
+resume procedure in Vz7
+'''
+def stop_ves():
+    proc = subprocess.Popen(["prlctl", "list", "-a", "-o", "status,name"], stdout=subprocess.PIPE)
+    for line in iter(proc.stdout.readline, ''):
+        if not line.startswith("running") and not line.startswith("suspended"):
+            continue
+
+        (status, name) = line.split()
+        if status == "running":
+            subprocess.call(['prlctl', 'stop', name])
+        else:
+            subprocess.call(['prlctl', 'start', name])
+            subprocess.call(['prlctl', 'stop', name])
 
 '''
 Actually run upgrade by means of redhat-upgrade-tool
@@ -229,6 +245,8 @@ def install():
 
     # Save dispatcher config
     subprocess.call(['cp', '/etc/parallels/dispatcher.xml', '/var/lib/vzupgrade'])
+
+    stop_ves()
 
     if cmdline.device:
         if cmdline.device.startswith("/dev"):
