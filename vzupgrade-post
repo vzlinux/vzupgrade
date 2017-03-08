@@ -20,3 +20,6 @@ cat /var/lib/vzupgrade/net_list | grep -v "^Bridged\|^Host-Only\|^Network ID" | 
         done
     done
 done
+
+# Post-processing of VEs
+/var/lib/vzupgrade/vzupgrade-post-ves
