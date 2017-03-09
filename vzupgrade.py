@@ -190,11 +190,23 @@ def install():
                 print(line.replace("vzlicupdate -n", "#vzlicupdate -n").rstrip())
             else:
                 print line.rstrip()
+        cfg_file = fileinput.FileInput("/var/lib/vzupgrade/vzupgrade-post", inplace=True)
+        for line in cfg_file:
+            if line.startswith("/var/lib/vzupgrade/vzupgrade-post-ves"):
+                print(line.replace("/var/lib/vzupgrade/vzupgrade-post-ves", "#/var/lib/vzupgrade/vzupgrade-post-ves").rstrip())
+            else:
+                print line.rstrip()
     elif cmdline.license:
         cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
         for line in cfg_file:
             if line.startswith("vzlicupdate -n"):
                 print(line.replace("vzlicupdate -n", "vzlicload -p " + cmdline.license).rstrip())
+            else:
+                print line.rstrip()
+        cfg_file = fileinput.FileInput("/var/lib/vzupgrade/vzupgrade-post", inplace=True)
+        for line in cfg_file:
+            if line.startswith("#/var/lib/vzupgrade/vzupgrade-post-ves"):
+                print(line.replace("#/var/lib/vzupgrade/vzupgrade-post-ves", "/var/lib/vzupgrade/vzupgrade-post-ves").rstrip())
             else:
                 print line.rstrip()
 
