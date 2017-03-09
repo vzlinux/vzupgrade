@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 #
-# Copyright (c) 2017 Parallels IP Holdings GmbH
+# Copyright (c) 2017 Parallels International GmbH
 #
 
 import prlsdkapi

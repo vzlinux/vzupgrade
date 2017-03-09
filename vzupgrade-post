@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2017 Parallels IP Holdings GmbH
+# Copyright (c) 2017 Parallels International GmbH
 #
 
 WAIT_TIMEOUT=1
