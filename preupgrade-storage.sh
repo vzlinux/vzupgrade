@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2017 Parallels IP Holdings GmbH
+#
+
 SOURCE="pstorage"
 DEST="vstorage"
 

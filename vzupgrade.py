@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+#
+# Copyright (c) 2017 Parallels IP Holdings GmbH
+#
+
 import subprocess
 import argparse
 import sys
