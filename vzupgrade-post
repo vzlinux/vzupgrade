@@ -4,7 +4,7 @@
 # Copyright (c) 2017 Parallels International GmbH
 #
 
-WAIT_TIMEOUT=1
+WAIT_TIMEOUT=3
 MAX_RETRIES=20
 
 cat /var/lib/vzupgrade/net_list | grep -v "^Bridged\|^Host-Only\|^Network ID" | while read net vtype device; do

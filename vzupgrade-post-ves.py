@@ -8,10 +8,22 @@ import prlsdkapi
 from prlsdkapi import consts as pc
 import subprocess
 import syslog
+import time
 
-prlsdkapi.init_server_sdk()
-_server = prlsdkapi.Server()
-_server.login_local().wait()
+WAIT_TIMEOUT = 3
+MAX_RETRIES = 20
+
+attempts = 0
+while attempts < MAX_RETRIES:
+    try:
+        prlsdkapi.init_server_sdk()
+        _server = prlsdkapi.Server()
+        _server.login_local().wait()
+        break
+    except:
+        attempts += 1
+        syslog.syslog("vzupgrade-post: waiting for dispatcher...")
+        time.sleep(WAIT_TIMEOUT)
 
 flags_running = [pc.VMS_STARTING, pc.VMS_RUNNING, pc.VMS_SUSPENDING, pc.VMS_SNAPSHOTING, pc.VMS_RESETTING, pc.VMS_PAUSING, pc.VMS_CONTINUING, pc.VMS_MOUNTED]
 
@@ -28,5 +40,5 @@ for ve in ves:
         continue
 
     # Now we have a VE which has autostart='yes' but is not running. Let's force its start
-    syslog.syslog("Starting %s" % (ve.get_uuid()))
+    syslog.syslog("vzupgrade-post: Starting %s" % (ve.get_uuid()))
     ve.start()
