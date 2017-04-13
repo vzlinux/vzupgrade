@@ -150,6 +150,31 @@ def stop_ves():
             subprocess.call(['prlctl', 'stop', name])
 
 '''
+Save different configuration parameters
+'''
+def save_configs():
+    # Save info about vlans
+    subprocess.call(['mkdir', '-p', '/var/lib/vzupgrade'])
+    netlist = open('/var/lib/vzupgrade/net_list', 'w')
+    subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
+    netlist.close();
+    iflist = open('/var/lib/vzupgrade/iflist', 'w')
+    subprocess.call(['ifconfig'], stdout=iflist)
+    iflist.close();
+
+    # Save dispatcher config
+    subprocess.call(['cp', '/etc/parallels/dispatcher.xml', '/var/lib/vzupgrade'])
+
+    # Info about services
+    chklist = open('/var/lib/vzupgrade/services', 'w')
+    subprocess.call(['chkconfig', '--list'], stdout=chklist)
+    chklist.close();
+
+    # Archive the whole /etc folder
+    subprocess.call(['tar', 'cxf', '/var/lib/vzupgrade/etc.tar.gz', '/etc'], stdout=chklist)
+
+
+'''
 Actually run upgrade by means of redhat-upgrade-tool
 Preliminary launch preupgrade-assistant if it has not been launched yet
 '''
@@ -234,10 +259,6 @@ def install():
     # during upgrade
     # Note that redhat-upgrade-tool scans disabled repos during upgrade. So just move
     # repo files out of /etc/yum.repos.d
-#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-updates'])
-#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzolinux-base'])
-#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo'])
-#    subprocess.call(['yum-config-manager', '--disable', 'virtuozzo-updates'])
     subprocess.call(['mv', '/etc/yum.repos.d', '/etc/yum.repos.d.orig'])
     subprocess.call(['mkdir', '/etc/yum.repos.d'])
 
@@ -250,18 +271,7 @@ def install():
     subprocess.call(['rm', '-rf', '/var/tmp/system-upgrade'])
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
-    # Save info about vlans
-    subprocess.call(['mkdir', '-p', '/var/lib/vzupgrade'])
-    netlist = open('/var/lib/vzupgrade/net_list', 'w')
-    subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
-    netlist.close();
-    iflist = open('/var/lib/vzupgrade/iflist', 'w')
-    subprocess.call(['ifconfig'], stdout=iflist)
-    iflist.close();
-
-    # Save dispatcher config
-    subprocess.call(['cp', '/etc/parallels/dispatcher.xml', '/var/lib/vzupgrade'])
-
+    save_configs()
     stop_ves()
 
     if cmdline.device:
