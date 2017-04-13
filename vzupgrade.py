@@ -171,7 +171,7 @@ def save_configs():
     chklist.close();
 
     # Archive the whole /etc folder
-    subprocess.call(['tar', 'cxf', '/var/lib/vzupgrade/etc.tar.gz', '/etc'], stdout=chklist)
+    subprocess.call(['tar', 'cxf', '/var/lib/vzupgrade/etc.tar.gz', '/etc'])
 
 
 '''
