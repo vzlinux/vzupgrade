@@ -13,6 +13,7 @@ import time
 import shutil
 import re
 import fileinput
+import glob
 from lxml import etree
 
 '''
@@ -173,6 +174,19 @@ def save_configs():
     # Archive the whole /etc folder
     subprocess.call(['tar', 'czf', '/var/lib/vzupgrade/etc.tar.gz', '/etc'])
 
+'''
+Check that packages that are going to be used for upgrade
+contains at least the very minimal basis - absence of some packages
+guarantees that upgrade will fail
+'''
+def check_upgrade_sanity():
+    packages = ['glibc*x86_64*', 'systemd*x86_64*']
+    for pkg in packages:
+        if not glob.glob("/var/lib/system-upgrade/" + pkg):
+            print("!!!!!!!!!!!! FINAL CHECK FAILED, DO NOT RUN THE UPGRADE !!!!!!!!!!!!")
+            print("Can't find %s among upgrade packages. Did you forget to specify additionaly repositories?" % pkg)
+            print("The upgrade will likely fail, but you can reboot and proceed at your own risk.")
+            sys.exit(1)
 
 '''
 Actually run upgrade by means of redhat-upgrade-tool
@@ -188,11 +202,6 @@ def install():
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
-
-    # Enable sshd if it was enabled in Vz6
-#    if 'sshd' in open("/root/preupgrade/Virtuozzo6_7/system/initscripts/control/enabled.log").read():
-#        with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
-#            cfg_file.write("systemctl enable sshd 2>&1 | tee -a /var/log/vzupgrade.log\n")
 
     if cmdline.disable_rk_autoupdate:
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
@@ -293,11 +302,18 @@ def install():
         subprocess.call(['cp', '-r', cmdline.device + "/Packages/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', '-r', cmdline.device + "/repodata/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', cmdline.device + "/.discinfo", '/var/lib/upgrade_pkgs'])
+
         fix_repomd()
+        cmd = ['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post']
+        if cmdline.add_repo:
+            for rep in cmdline.add_repo:
+                cmd.append('--addrepo')
+                cmd.append(rep)
+
+        subprocess.call(cmd)
+        check_upgrade_sanity()
         if cmdline.reboot:
-            subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post', '--reboot'])
-        else:
-            subprocess.call(['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post'])
+            subprocess.call(['reboot'])
     elif cmdline.network:
         # Cound number of folders to be cut in address
         # (when passing argument to --cut-dirs wget option)
@@ -309,14 +325,15 @@ def install():
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
         fix_repomd()
+        cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
+        for rep in cmdline.add_repo:
+            cmd.append('--addrepo')
+            cmd.append(rep)
 
-        # Dump a warning about VM backup location
-        check_vm_backups()
-
+        subprocess.call(cmd)
+        check_upgrade_sanity()
         if cmdline.reboot:
-            subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post', '--reboot'])
-        else:
-            subprocess.call(['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post'])
+            subprocess.call(['reboot'])
 
 def list_prereq():
     print "=== Virtuozzo-specific upgrade prerequisites: ==="
@@ -341,6 +358,7 @@ def parse_command_line():
 
     sp = subparsers.add_parser('install', help='Perform upgrade')
     sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
+    sp.add_argument('--add-repo', nargs='*', action='store', help='additional repository to attach during upgrade, in the "repo_id=url" format. You can specify multiple repos here')
     sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
     sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed')
     sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
