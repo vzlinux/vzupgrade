@@ -181,8 +181,14 @@ guarantees that upgrade will fail
 '''
 def check_upgrade_sanity():
     packages = ['glibc*x86_64*', 'systemd*x86_64*']
+    if os.path.isfile("/var/lib/system-upgrade/package.list"):
+        f = open("/var/lib/system-upgrade/package.list")
+        pkg_line = '|'.join(f.readlines())
+        f.close()
+
     for pkg in packages:
-        if not glob.glob("/var/lib/system-upgrade/" + pkg):
+        if not glob.glob("/var/lib/system-upgrade/" + pkg) \
+                and not re.search(pkg.replace("*", ".*"), pkg_line):
             print("!!!!!!!!!!!! FINAL CHECK FAILED, DO NOT RUN THE UPGRADE !!!!!!!!!!!!")
             print("Can't find %s among upgrade packages. Did you forget to specify additionaly repositories?" % pkg)
             print("The upgrade will likely fail, but you can reboot and proceed at your own risk.")
