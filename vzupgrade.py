@@ -14,6 +14,7 @@ import shutil
 import re
 import fileinput
 import glob
+import yum
 from lxml import etree
 
 '''
@@ -69,10 +70,27 @@ def check_blockers():
         return 1
 
 '''
+Transform build id into an integer number
+'''
+def get_build_hash(ver):
+    ver = ver.replace(" (", ".")
+    ver = ver.replace(")", "")
+    try:
+        [a,b,c,d] = ver.split(".")
+        w = int(a)*10000 + int(b)*1000 + int(c)*100 + int(d)
+        return w
+    except:
+        return 0
+
+'''
 repomd.xml on iso doesn't contain build id
 Let's add it on the basis of .discinfo file
 '''
 def fix_repomd():
+    product_distro = "cpe:/o:virtuozzoproject:vz:7"
+    yb = yum.YumBase()
+    yb.disablePlugins()
+
     try:
         f = open("/var/lib/upgrade_pkgs/.discinfo", "r")
         for  l in f.readlines():
@@ -81,6 +99,22 @@ def fix_repomd():
             buildid = l.replace("Virtuozzo ", "").rstrip()
             break
         f.close()
+
+        if cmdline.add_repo:
+            # If we have additional repos, extract repo ids from them
+            # and choose the highest one
+            idx = 0
+            w = get_build_hash(buildid)
+            for rep in cmdline.add_repo:
+                yb.add_enable_repo("vzupgrade_repo" + str(idx), [rep.split('=')[1]])
+                for repo in yb.repos.findRepos("vzupgrade_repo" + str(idx)):
+                    if repo._getRepoXML().tags['distro'] and product_distro in repo._getRepoXML().tags['distro']:
+                        ver = repo._getRepoXML().tags['distro'][product_distro].pop()
+                        new_w = get_build_hash(ver)
+                        if new_w > w:
+                            buildid = ver
+                            w = new_w
+                idx+=1
 
         tree = etree.parse("/var/lib/upgrade_pkgs/repodata/repomd.xml")
         repoid = etree.Element("tags")
@@ -96,7 +130,7 @@ def fix_repomd():
         f.write(etree.tostring(tree.getroot()))
         f.close()
     except:
-        print("Failed to set build id for the upgraded system, /etc/virtuozzo release may contain a dummy build number.")
+        print("Failed to set build id for the upgraded system, /etc/virtuozzo-release may contain a dummy build number.")
         pass
 
 
