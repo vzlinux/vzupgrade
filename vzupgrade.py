@@ -332,9 +332,10 @@ def install():
 
         fix_repomd()
         cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
-        for rep in cmdline.add_repo:
-            cmd.append('--addrepo')
-            cmd.append(rep)
+        if cmdline.add_repo:
+            for rep in cmdline.add_repo:
+                cmd.append('--addrepo')
+                cmd.append(rep)
 
         subprocess.call(cmd)
         check_upgrade_sanity()
