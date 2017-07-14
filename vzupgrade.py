@@ -229,6 +229,27 @@ def check_upgrade_sanity():
             sys.exit(1)
 
 '''
+Download packages from additional repositories
+'''
+def download_pkgs():
+    if not cmdline.add_repo:
+        return
+
+    idx=0
+    for rep in cmdline.add_repo:
+        net_target = re.sub(r'.*://', '', rep)
+        net_target = re.sub(r'/$', '', net_target)
+        target_folders = net_target.split("/")
+        rep = re.sub(r'.*=', '', rep)
+        rep_name = '/var/lib/upgrade_pkgs' + str(idx)
+        subprocess.call(['rm', '-rf', rep_name])
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
+        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
+        idx += 1
+
+
+'''
 Actually run upgrade by means of redhat-upgrade-tool
 Preliminary launch preupgrade-assistant if it has not been launched yet
 '''
@@ -253,8 +274,10 @@ def install():
     if cmdline.skip_post_update:
         cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
         for line in cfg_file:
-            if line.startswith("yum update"):
+            if line.startswith("yum update --disablerepo=factory"):
                 print(line.replace("yum update", "#yum update").rstrip())
+            elif line.startswith("yum groupupdate --disablerepo=factory"):
+                print(line.replace("yum groupupdate", "#yum groupupdate").rstrip())
             elif line.startswith("yum distro-sync --disablerepo=factory"):
                 print(line.replace("yum distro-sync --disablerepo=factory", "#yum distro-sync --disablerepo=factory").rstrip())
             else:
@@ -344,6 +367,7 @@ def install():
         subprocess.call(['cp', cmdline.device + "/.discinfo", '/var/lib/upgrade_pkgs'])
 
         fix_repomd()
+        download_pkgs()
         cmd = ['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post']
         if cmdline.add_repo:
             for rep in cmdline.add_repo:
@@ -365,6 +389,7 @@ def install():
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
         fix_repomd()
+        download_pkgs()
         cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
         if cmdline.add_repo:
             for rep in cmdline.add_repo:
