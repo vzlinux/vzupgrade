@@ -276,6 +276,7 @@ def install():
         for line in cfg_file:
             if line.startswith("yum update --disablerepo=factory"):
                 print(line.replace("yum update", "#yum update").rstrip())
+                print("[ -f /sbin/readykernel ] && readykernel autoupdate disable")
             elif line.startswith("yum groupupdate --disablerepo=factory"):
                 print(line.replace("yum groupupdate", "#yum groupupdate").rstrip())
             elif line.startswith("yum distro-sync --disablerepo=factory"):
