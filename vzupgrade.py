@@ -264,7 +264,7 @@ def install():
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
 
-    if cmdline.disable_rk_autoupdate:
+    if cmdline.disable_rk_autoupdate or cmdline.skip_post_update:
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
             cfg_file.write("/sbin/readykernel autoupdate disable 2>&1 | tee -a /var/log/vzupgrade.log\n")
     else:
@@ -276,7 +276,6 @@ def install():
         for line in cfg_file:
             if line.startswith("yum update --disablerepo=factory"):
                 print(line.replace("yum update", "#yum update").rstrip())
-                print("[ -f /sbin/readykernel ] && readykernel autoupdate disable")
             elif line.startswith("yum groupupdate --disablerepo=factory"):
                 print(line.replace("yum groupupdate", "#yum groupupdate").rstrip())
             elif line.startswith("yum distro-sync --disablerepo=factory"):
