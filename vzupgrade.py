@@ -244,9 +244,9 @@ def download_pkgs():
         rep_name = '/var/lib/upgrade_pkgs' + str(idx)
         if cmdline.clean_cache:
             subprocess.call(['rm', '-rf', rep_name])
-        subprocess.call(['wget', '-r', '-nc', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
-        subprocess.call(['wget', '-r', '-nc', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
-        subprocess.call(['wget', '-r', '-nc', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
+        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
+        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
+        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
         idx += 1
 
 
