@@ -22,7 +22,7 @@ Check upgrade prerequisites - run preupgrade-assistant
 or only its parts if '--blocker' option is specified
 '''
 def check():
-    if check_blockers() > 0:
+    if not cmdline.skip_vz and check_blockers() > 0:
         sys.exit(1)
     if not cmdline.blocker:
         subprocess.call(['preupg'])
@@ -43,6 +43,7 @@ that check for upgrade blockers
 '''
 def check_blockers():
     FNULL = open(os.devnull, 'w')
+
     ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)
     if ret > 0:
         print "INPLACERISK: EXTREME: You have updates available! Please install all updates first"
@@ -166,6 +167,7 @@ def update_pva():
     with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
         cfg_file.write("echo 'systemctl disable vzupgrade 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
         cfg_file.write("echo 'rm -f /etc/systemd/system/vzupgrade.service 2>&1 | tee -a /var/log/vzupgrade.log' >> /var/lib/vzupgrade/vzupgrade-post\n")
+       
 
 '''
 Force all VEs to be stopped. We can't suspend them due to different
@@ -214,6 +216,7 @@ contains at least the very minimal basis - absence of some packages
 guarantees that upgrade will fail
 '''
 def check_upgrade_sanity():
+    pkg_line = ''
     packages = ['glibc*x86_64*', 'systemd*x86_64*']
     if os.path.isfile("/var/lib/system-upgrade/package.list"):
         f = open("/var/lib/system-upgrade/package.list")
@@ -246,7 +249,10 @@ def download_pkgs():
             subprocess.call(['rm', '-rf', rep_name])
         subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
         subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
-        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
+        try:
+            subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
+        except:
+            pass
         idx += 1
 
 
@@ -264,6 +270,10 @@ def install():
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
             cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
+
+    if not os.path.exists("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh"):
+       os.makedirs("/root/preupgrade/postupgrade.d/pkgdowngrades")
+       open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "w").close()
 
     if cmdline.disable_rk_autoupdate or cmdline.skip_post_update:
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
@@ -312,7 +322,8 @@ def install():
             else:
                 print line.rstrip()
 
-    update_pva()
+    if not cmdline.skip_vz:
+        update_pva()
 
     # Clean up rpm __db* files - they can break update process
     for root, dirs, files in os.walk('/var/lib/rpm/__db*'):
@@ -344,8 +355,9 @@ def install():
     subprocess.call(['rm', '-rf', '/var/tmp/system-upgrade'])
     subprocess.call(['mkdir', '-p', '/var/lib/upgrade_pkgs'])
 
-    save_configs()
-    stop_ves()
+    if not cmdline.skip_vz:
+        save_configs()
+        stop_ves()
 
     if cmdline.device:
         if cmdline.device.startswith("/dev"):
@@ -367,7 +379,8 @@ def install():
         subprocess.call(['cp', '-r', cmdline.device + "/repodata/", '/var/lib/upgrade_pkgs'])
         subprocess.call(['cp', cmdline.device + "/.discinfo", '/var/lib/upgrade_pkgs'])
 
-        fix_repomd()
+        if not cmdline.skip_vz:
+            fix_repomd()
         download_pkgs()
         cmd = ['redhat-upgrade-tool', '--device', cmdline.device, '--cleanup-post']
         if cmdline.add_repo:
@@ -389,7 +402,8 @@ def install():
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
         subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
-        fix_repomd()
+        if not cmdline.skip_vz:
+            fix_repomd()
         download_pkgs()
         cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
         if cmdline.add_repo:
@@ -418,6 +432,7 @@ def parse_command_line():
 
     sp = subparsers.add_parser('check', help='check upgrade prerequisites and generate upgrade scripts')
     sp.add_argument('--blocker', action='store_true', help='check only upgrade blockers')
+    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
     sp.set_defaults(func=check)
 
     sp = subparsers.add_parser('list', help='list prerequisites for in-place upgrade')
@@ -430,6 +445,7 @@ def parse_command_line():
     sp.add_argument('--clean-cache', action='store_true', help='clean downloaded packages cache')
     sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed and do not enabled readykernel autoupdate')
     sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
+    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
     src_group = sp.add_mutually_exclusive_group(required=True)
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
