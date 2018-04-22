@@ -249,10 +249,7 @@ def download_pkgs():
             subprocess.call(['rm', '-rf', rep_name])
         subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
         subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
-        try:
-            subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
-        except:
-            pass
+        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
         idx += 1
 
 
