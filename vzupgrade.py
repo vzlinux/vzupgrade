@@ -24,6 +24,11 @@ or only its parts if '--blocker' option is specified
 def check():
     if not cmdline.skip_vz and check_blockers() > 0:
         sys.exit(1)
+    if cmdline.skip_vz and not os.path.isfile("/etc/virtuozzo-release"):
+        f = open("/etc/virtuozzo-release")
+        f.write("Virtuozzo release 6.0.12", "w")
+        f.close()
+
     if not cmdline.blocker:
         subprocess.call(['preupg'])
 
