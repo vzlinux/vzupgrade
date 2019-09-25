@@ -398,19 +398,27 @@ def install():
         if cmdline.reboot:
             subprocess.call(['reboot'])
     elif cmdline.network:
-        # Cound number of folders to be cut in address
-        # (when passing argument to --cut-dirs wget option)
-        net_target = re.sub(r'.*://', '', cmdline.network)
-        net_target = re.sub(r'/$', '', net_target)
-        target_folders = net_target.split("/")
-        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
-        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
-        subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
+        if cmdline.network.endswith(".iso"):
+            subprocess.call(['wget', cmdline.network, '-O', '/var/tmp/vzupgrade.iso'])
+            cmd = ['redhat-upgrade-tool', '--iso', '/var/tmp/vzupgrade.iso', '--cleanup-post']
+            if not cmdline.skip_vz:
+               fix_repomd()
+            download_pkgs()
+        else:
+            # Cound number of folders to be cut in address
+            # (when passing argument to --cut-dirs wget option)
+            net_target = re.sub(r'.*://', '', cmdline.network)
+            net_target = re.sub(r'/$', '', net_target)
+            target_folders = net_target.split("/")
+            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
+            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
+            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
-        if not cmdline.skip_vz:
-            fix_repomd()
-        download_pkgs()
-        cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
+            if not cmdline.skip_vz:
+               fix_repomd()
+            download_pkgs()
+            cmd = ['redhat-upgrade-tool', '--network', '7.0', '--instrepo', cmdline.network, '--cleanup-post']
+
         if cmdline.add_repo:
             for rep in cmdline.add_repo:
                 cmd.append('--addrepo')
