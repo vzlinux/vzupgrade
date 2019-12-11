@@ -329,6 +329,15 @@ def install():
             else:
                 print line.rstrip()
 
+    # No need in ELS check during upgrade
+    if os.path.isfile("/etc/yum/pluginconf.d/pre-transaction-actions.conf"):
+        els_cfg = fileinput.FileInput("/etc/yum/pluginconf.d/pre-transaction-actions.conf", inplace=True)
+        for line in els_cfg:
+            if line.startswith("enabled"):
+                print("enabled = 0")
+            else:
+                print line.rstrip()
+
     if not cmdline.skip_vz:
         update_pva()
 
