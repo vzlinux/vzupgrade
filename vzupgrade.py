@@ -20,6 +20,8 @@ import glob
 import yum
 from lxml import etree
 
+DEFAULT_NETWORK_REPO="http://repo.virtuozzo.com/vz/releases/7.0/x86_64/os/"
+
 '''
 Check upgrade prerequisites - run preupgrade-assistant
 or only its parts if '--blocker' option is specified
@@ -473,7 +475,7 @@ def parse_command_line():
     sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed and do not enabled readykernel autoupdate')
     sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
     sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
-    src_group = sp.add_mutually_exclusive_group(required=True)
+    src_group = sp.add_mutually_exclusive_group()
     src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
     src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
     lic_group = sp.add_mutually_exclusive_group(required=True)
@@ -487,6 +489,12 @@ def parse_command_line():
 
 if __name__ == '__main__':
     parse_command_line()
+
+    if not cmdline.device and not cmdline.network:
+        cmdline.network = DEFAULT_NETWORK_REPO
+    if (cmdline.device or cmdline.network == DEFAULT_NETWORK_REPO) and not cmdline.add_repo:
+        cmdline.add_repo = "vzlinux7=http://repo.virtuozzo.com/vzlinux/7/x86_64/os/"
+
     try:
         cmdline.func()
     except KeyboardInterrupt:
