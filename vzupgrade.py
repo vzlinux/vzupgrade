@@ -38,9 +38,9 @@ Check if we have VM backups and notify about new backup location if yes
 def check_vm_backups():
     if os.path.exists("/var/parallels/backups") and os.path.isdir("/var/parallels/backups"):
         if os.listdir("/var/parallels/backups"):
-            print "WARNING: We have detected that /var/parallels/backups folder is not empty."
-            print "         In Virtuozzo 7 default location for VM backups has been changed to /vz/vmprivate/backups."
-            print "         If you want to use your backups after upgrade, you will have to move them to the new location manually."
+            print("WARNING: We have detected that /var/parallels/backups folder is not empty.")
+            print("         In Virtuozzo 7 default location for VM backups has been changed to /vz/vmprivate/backups.")
+            print("         If you want to use your backups after upgrade, you will have to move them to the new location manually.")
 
 '''
 Explicitely launch VZ-specific preupgrade-assistant checkers
@@ -51,7 +51,7 @@ def check_blockers():
 
     ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)
     if ret > 0:
-        print "INPLACERISK: EXTREME: You have updates available! Please install all updates first"
+        print("INPLACERISK: EXTREME: You have updates available! Please install all updates first")
 
     # We have to set these ones when calling assitant checkers outside the assistant
     os.environ["XCCDF_RESULT_FAIL"] = "1"
@@ -69,10 +69,10 @@ def check_blockers():
     check_vm_backups()
 
     if ret == 0:
-        print "No upgrade blockers found!"
+        print("No upgrade blockers found!")
         return 0
     else:
-        print "Critical blockers found, please fix them before trying to upgrade"
+        print("Critical blockers found, please fix them before trying to upgrade")
         return 1
 
 '''
@@ -269,7 +269,7 @@ Preliminary launch preupgrade-assistant if it has not been launched yet
 '''
 def install():
     if not os.path.isdir("/root/preupgrade"):
-        print "It looks like preupgrade check was not performed, launching..."
+        print("It looks like preupgrade check was not performed, launching...")
         cmdline.blocker = False
         check()
 
@@ -299,7 +299,7 @@ def install():
             elif line.startswith("yum distro-sync --disablerepo=factory"):
                 print(line.replace("yum distro-sync --disablerepo=factory", "#yum distro-sync --disablerepo=factory").rstrip())
             else:
-                print line.rstrip()
+                print(line.rstrip())
 
     if cmdline.skip_license_upgrade:
         print('WARNING: Skipping license upgrade. You will not be able to launch any VM or container in the upgraded system until you enter a valid license!')
@@ -308,26 +308,26 @@ def install():
             if line.startswith("vzlicupdate -n"):
                 print(line.replace("vzlicupdate -n", "#vzlicupdate -n").rstrip())
             else:
-                print line.rstrip()
+                print(line.rstrip())
         cfg_file = fileinput.FileInput("/var/lib/vzupgrade/vzupgrade-post", inplace=True)
         for line in cfg_file:
             if line.startswith("/var/lib/vzupgrade/vzupgrade-post-ves"):
                 print(line.replace("/var/lib/vzupgrade/vzupgrade-post-ves", "#/var/lib/vzupgrade/vzupgrade-post-ves").rstrip())
             else:
-                print line.rstrip()
+                print(line.rstrip())
     elif cmdline.license:
         cfg_file = fileinput.FileInput("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", inplace=True)
         for line in cfg_file:
             if line.startswith("vzlicupdate -n"):
                 print(line.replace("vzlicupdate -n", "vzlicload -p " + cmdline.license).rstrip())
             else:
-                print line.rstrip()
+                print(line.rstrip())
         cfg_file = fileinput.FileInput("/var/lib/vzupgrade/vzupgrade-post", inplace=True)
         for line in cfg_file:
             if line.startswith("#/var/lib/vzupgrade/vzupgrade-post-ves"):
                 print(line.replace("#/var/lib/vzupgrade/vzupgrade-post-ves", "/var/lib/vzupgrade/vzupgrade-post-ves").rstrip())
             else:
-                print line.rstrip()
+                print(line.rstrip())
 
     # No need in ELS check during upgrade
     if os.path.isfile("/etc/yum/pluginconf.d/pre-transaction-actions.conf"):
@@ -336,7 +336,7 @@ def install():
             if line.startswith("enabled"):
                 print("enabled = 0")
             else:
-                print line.rstrip()
+                print(line.rstrip())
 
     if not cmdline.skip_vz:
         update_pva()
@@ -380,14 +380,14 @@ def install():
             tmpfolder = tempfile.mkdtemp()
             ret = subprocess.call(['mount', cmdline.device, tmpfolder])
             if ret > 0:
-                print "Tried to mount " + cmdline.device + " but failed"
+                print("Tried to mount " + cmdline.device + " but failed")
                 sys.exit(1)
             cmdline.device = tmpfolder
         elif cmdline.device.endswith(".iso") and os.path.isfile(cmdline.device):
             tmpfolder = tempfile.mkdtemp()
             ret = subprocess.call(['mount', '-o', 'loop', cmdline.device, tmpfolder])
             if ret > 0:
-                print "Tried to mount " + cmdline.device + " but failed"
+                print("Tried to mount " + cmdline.device + " but failed")
                 sys.exit(1)
             cmdline.device = tmpfolder
 
@@ -441,12 +441,12 @@ def install():
             subprocess.call(['reboot'])
 
 def list_prereq():
-    print "=== Virtuozzo-specific upgrade prerequisites: ==="
-    print "* No VMs exist on the host"
-    print "* There are no containers that use VZFS"
-    print "* There are no templates for OSes not supported by Vz7"
-    print "* All updates are installed"
-    print "* No Virtuozzo Automation packages are installed"
+    print("=== Virtuozzo-specific upgrade prerequisites: ===")
+    print("* No VMs exist on the host")
+    print("* There are no containers that use VZFS")
+    print("* There are no templates for OSes not supported by Vz7")
+    print("* All updates are installed")
+    print("* No Virtuozzo Automation packages are installed")
 
 
 def parse_command_line():
