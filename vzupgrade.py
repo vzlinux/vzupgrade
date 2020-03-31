@@ -490,10 +490,11 @@ def parse_command_line():
 if __name__ == '__main__':
     parse_command_line()
 
-    if not cmdline.device and not cmdline.network:
-        cmdline.network = DEFAULT_NETWORK_REPO
-    if (cmdline.device or cmdline.network == DEFAULT_NETWORK_REPO) and not cmdline.add_repo:
-        cmdline.add_repo = "vzlinux7=http://repo.virtuozzo.com/vzlinux/7/x86_64/os/"
+    if cmdline.func == 'install':
+        if not cmdline.device and not cmdline.network:
+            cmdline.network = DEFAULT_NETWORK_REPO
+        if (cmdline.device or cmdline.network == DEFAULT_NETWORK_REPO) and not cmdline.add_repo:
+            cmdline.add_repo = "vzlinux7=http://repo.virtuozzo.com/vzlinux/7/x86_64/os/"
 
     try:
         cmdline.func()
