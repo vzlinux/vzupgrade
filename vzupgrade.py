@@ -494,7 +494,7 @@ if __name__ == '__main__':
         if not cmdline.device and not cmdline.network:
             cmdline.network = DEFAULT_NETWORK_REPO
         if (cmdline.device or cmdline.network == DEFAULT_NETWORK_REPO) and not cmdline.add_repo:
-            cmdline.add_repo = "vzlinux7=http://repo.virtuozzo.com/vzlinux/7/x86_64/os/"
+            cmdline.add_repo = ["vzlinux7=http://repo.virtuozzo.com/vzlinux/7/x86_64/os/"]
 
     try:
         cmdline.func()
