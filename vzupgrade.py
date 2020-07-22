@@ -490,7 +490,7 @@ def parse_command_line():
 if __name__ == '__main__':
     parse_command_line()
 
-    if cmdline.func == 'install':
+    if cmdline.func == install:
         if not cmdline.device and not cmdline.network:
             cmdline.network = DEFAULT_NETWORK_REPO
         if (cmdline.device or cmdline.network == DEFAULT_NETWORK_REPO) and not cmdline.add_repo:
