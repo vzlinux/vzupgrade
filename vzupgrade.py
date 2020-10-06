@@ -30,8 +30,8 @@ def check():
     if not cmdline.skip_vz and check_blockers() > 0:
         sys.exit(1)
     if cmdline.skip_vz and not os.path.isfile("/etc/virtuozzo-release"):
-        f = open("/etc/virtuozzo-release")
-        f.write("Virtuozzo release 6.0.12", "w")
+        f = open("/etc/virtuozzo-release", "w")
+        f.write("Virtuozzo release 6.0.12")
         f.close()
 
     if not cmdline.blocker:
