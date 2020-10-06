@@ -259,7 +259,13 @@ def download_pkgs():
         rep_name = '/var/lib/upgrade_pkgs' + str(idx)
         if cmdline.clean_cache:
             subprocess.call(['rm', '-rf', rep_name])
-        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
+        tmpfolder = tempfile.mkdtemp()
+        t = open(tmpfolder + "/yum.conf.vzup", "w")
+        t.write('[vzupgrade' + str(idx) + ']\nbaseurl=' + rep)
+        t.close()
+        # Prefer reposync over wget to download packages since we can have multiple version of the same package in repo
+        subprocess.call(['/usr/bin/reposync', '-c', tmpfolder + '/yum.conf.vzup', '--download_path', rep_name, '--newest-only', '--download-metadata', '--norepopath'])
+#        subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/Packages/", '-P', rep_name])
         subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/repodata/", '-P', rep_name])
         try:
             subprocess.call(['wget', '-r', '-c', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', rep + "/.discinfo", '-P', rep_name])
@@ -426,7 +432,12 @@ def install():
             net_target = re.sub(r'.*://', '', cmdline.network)
             net_target = re.sub(r'/$', '', net_target)
             target_folders = net_target.split("/")
-            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
+            tmpfolder = tempfile.mkdtemp()
+            t = open(tmpfolder + "/yum.conf.vzup", "w")
+            t.write('[vzupgrade]\nbaseurl=' + cmdline.network)
+            t.close()
+            subprocess.call(['/usr/bin/reposync', '-c', tmpfolder + '/yum.conf.vzup', '--download_path', '/var/lib/upgrade_pkgs', '--newest-only', '--download-metadata', '--norepopath'])
+#            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
             subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/repodata/", '-P', '/var/lib/upgrade_pkgs'])
             subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/.discinfo", '-P', '/var/lib/upgrade_pkgs'])
 
