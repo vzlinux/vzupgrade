@@ -1,0 +1,8 @@
+[vz8]
+name=Vz8
+mirrorlist=http://repo.virtuozzo.com/vz/mirrorlists/8.0/releases-os.mirrorlist
+#baseurl=http://repo.virtuozzo.com/vz/releases/8.0/x86_64/os/
+enabled=1
+gpgcheck=1
+priority=50
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Virtuozzo-8

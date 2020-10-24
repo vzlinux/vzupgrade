@@ -1,0 +1,8 @@
+[vzlinux8]
+name=VzLinux8
+mirrorlist=http://repo.virtuozzo.com/vzlinux/mirrorlist/mirrors-8-os
+#baseurl=http://repo.virtuozzo.com/vzlinux/8/$basearch/os/
+enabled=1
+gpgcheck=1
+priority=90
+gpgkey=file:///etc/pki/rpm-gpg/VZLINUX_GPG_KEY file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Virtuozzo-8
