@@ -17,8 +17,8 @@ import shutil
 import re
 import fileinput
 import glob
-import yum
-from lxml import etree
+#import yum
+#from lxml import etree
 
 '''
 Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
@@ -34,12 +34,12 @@ def fix_sshd_config():
 
     # If we are here, we have to set explici parameter
     modified = False
-    with fileinput.input(files=('/etc/ssh/sshd_config')) as f:
+    with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
         for l in f:
             if not modified and "PermitRootLogin" in l:
                 print("PermitRootLogin yes")
                 modified = True
-            print(l)
+            print(l.strip())
 
     if modified:
         return
