@@ -21,6 +21,39 @@ import yum
 from lxml import etree
 
 '''
+Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
+
+The problem is that default is different in Vz7 and Vz8
+'''
+def fix_sshd_config():
+    # Check if we already have explicit PermitRootLogin
+    with open("/etc/ssh/sshd_config") as f:
+        for l in f:
+            if l.strip().startswith("PermitRootLogin"):
+                return
+
+    # If we are here, we have to set explici parameter
+    modified = False
+    with fileinput.input(files=('/etc/ssh/sshd_config')) as f:
+        for l in f:
+            if not modified and "PermitRootLogin" in l:
+                print("PermitRootLogin yes")
+                modified = True
+            print(l)
+
+    if modified:
+        return
+
+    # If we are here then we haven't find a place to add our line
+    # Let's add it somewhere in the beginning then
+    with fileinput.input(files=('/etc/ssh/sshd_config')) as f:
+        for l in f:
+            if not modified and not l.strip().startswith('#') and l.strip():
+                print("PermitRootLogin yes")
+                modified = True
+            print(l)
+
+'''
 Add Vz8 repositories
 
 TODO:
@@ -37,6 +70,7 @@ def add_repos():
 Check upgrade prerequisites
 '''
 def check():
+    fix_sshd_config()
     add_repos()
     if check_blockers():
         return 1
