@@ -65,6 +65,24 @@ def add_repos():
         if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
             shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
 
+'''
+Put file with answers to required place.
+Currently we don't have any questions to ask user, so just use pre-created file
+'''
+def add_answers():
+    if not os.path.isfile("/var/log/leapp"):
+        os.makedirs("/var/log/leapp")
+    for f in ["answerfile", "answerfile.userchoices"]:
+        if os.path.isfile("/var/log/leapp/" + f):
+            os.remove("/var/log/leapp/" + f)
+        copyfile("/etc/leapp/" + f, "/var/log/leapp/" + f)
+
+'''
+Before running check or upgrade, we should put some files to proper places
+'''
+def prepare_files():
+    add_repos()
+    add_answers()
 
 '''
 Check upgrade prerequisites
