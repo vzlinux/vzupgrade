@@ -1,0 +1,3 @@
+[remove_pam_pkcs11_module_check]
+confirm = True
+
