@@ -17,6 +17,7 @@ import shutil
 import re
 import fileinput
 import glob
+from shutil import copyfile
 #import yum
 #from lxml import etree
 
@@ -70,12 +71,12 @@ Put file with answers to required place.
 Currently we don't have any questions to ask user, so just use pre-created file
 '''
 def add_answers():
-    if not os.path.isfile("/var/log/leapp"):
+    if not os.path.exists("/var/log/leapp"):
         os.makedirs("/var/log/leapp")
     for f in ["answerfile", "answerfile.userchoices"]:
         if os.path.isfile("/var/log/leapp/" + f):
             os.remove("/var/log/leapp/" + f)
-        copyfile("/etc/leapp/" + f, "/var/log/leapp/" + f)
+        copyfile("/etc/leapp/answers/" + f, "/var/log/leapp/" + f)
 
 '''
 Before running check or upgrade, we should put some files to proper places
@@ -89,7 +90,7 @@ Check upgrade prerequisites
 '''
 def check():
     fix_sshd_config()
-    add_repos()
+    prepare_files()
     if check_blockers():
         return 1
     subprocess.call(['leapp', 'preupgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
@@ -196,7 +197,7 @@ Actually run upgrade by means of leapp tool
 leapp automatically launces preupgrade if it was not passed yet
 '''
 def install():
-    add_repos()
+    prepare_files()
     if check_blockers():
         return 1
 
