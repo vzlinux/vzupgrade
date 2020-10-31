@@ -249,6 +249,8 @@ def parse_command_line():
     sp.set_defaults(func=install)
 
     cmdline = parser.parse_args(sys.argv[1:])
+    if not hasattr(cmdline, "func"):
+        cmdline.func = install
 
 
 if __name__ == '__main__':
