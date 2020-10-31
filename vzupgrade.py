@@ -93,8 +93,13 @@ def check():
     prepare_files()
     if check_blockers():
         return 1
-    subprocess.call(['leapp', 'preupgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
+    try:
+        subprocess.check_call(['leapp', 'preupgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
+    except:
+        return 1
 
+    if cmdline.reboot:
+        subprocess.call(['reboot'])
 
 '''
 Explicitely launch VZ-specific preupgrade-assistant checkers
@@ -234,7 +239,7 @@ def parse_command_line():
     sp = subparsers.add_parser('install', help='Perform upgrade')
 #    sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
 #    sp.add_argument('--add-repo', nargs='*', action='store', help='additional repository to attach during upgrade, in the "repo_id=url" format. You can specify multiple repos here')
-#    sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
+    sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
 #    sp.add_argument('--clean-cache', action='store_true', help='clean downloaded packages cache')
 #    sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed and do not enabled readykernel autoupdate')
 #    sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
