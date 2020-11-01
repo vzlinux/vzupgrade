@@ -82,6 +82,7 @@ def add_answers():
 Before running check or upgrade, we should put some files to proper places
 '''
 def prepare_files():
+    fix_sshd_config()
     add_repos()
     add_answers()
 
@@ -89,7 +90,6 @@ def prepare_files():
 Check upgrade prerequisites
 '''
 def check():
-    fix_sshd_config()
     prepare_files()
     if check_blockers():
         return 1
