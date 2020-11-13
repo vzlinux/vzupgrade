@@ -261,7 +261,7 @@ def download_pkgs():
             subprocess.call(['rm', '-rf', rep_name])
         tmpfolder = tempfile.mkdtemp()
         t = open(tmpfolder + "/yum.conf.vzup", "w")
-        t.write('[vzupgrade' + str(idx) + ']\nbaseurl=' + rep)
+        t.write('[vzupgrade' + str(idx) + ']\nbaseurl=' + rep + '\n')
         t.close()
         # Prefer reposync over wget to download packages since we can have multiple version of the same package in repo
         subprocess.call(['/usr/bin/reposync', '-c', tmpfolder + '/yum.conf.vzup', '--download_path', rep_name, '--newest-only', '--download-metadata', '--norepopath'])
@@ -287,7 +287,7 @@ def install():
     if cmdline.boot:
         with open("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh", "a") as cfg_file:
             cfg_file.write("grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 | tee -a /var/log/vzupgrade.log\n")
-            cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log")
+            cfg_file.write("grub2-install " + cmdline.boot + " 2>&1 | tee -a /var/log/vzupgrade.log\n")
 
     if not os.path.exists("/root/preupgrade/postupgrade.d/pkgdowngrades/fixpkgdowngrades.sh"):
        os.makedirs("/root/preupgrade/postupgrade.d/pkgdowngrades")
@@ -434,7 +434,7 @@ def install():
             target_folders = net_target.split("/")
             tmpfolder = tempfile.mkdtemp()
             t = open(tmpfolder + "/yum.conf.vzup", "w")
-            t.write('[vzupgrade]\nbaseurl=' + cmdline.network)
+            t.write('[vzupgrade]\nbaseurl=' + cmdline.network + '\n')
             t.close()
             subprocess.call(['/usr/bin/reposync', '-c', tmpfolder + '/yum.conf.vzup', '--download_path', '/var/lib/upgrade_pkgs', '--newest-only', '--download-metadata', '--norepopath'])
 #            subprocess.call(['wget', '-r', '-nH', '--cut-dirs', str(len(target_folders)-1), '--no-parent', cmdline.network + "/Packages/", '-P', '/var/lib/upgrade_pkgs'])
