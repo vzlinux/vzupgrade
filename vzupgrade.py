@@ -98,9 +98,6 @@ def check():
     except:
         return 1
 
-    if cmdline.reboot:
-        subprocess.call(['reboot'])
-
 '''
 Explicitely launch VZ-specific preupgrade-assistant checkers
 that check for upgrade blockers
@@ -213,6 +210,10 @@ def install():
                 os.remove("/var/lib/rpm/" + f)
 
     subprocess.call(['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
+
+    if cmdline.reboot:
+        subprocess.call(['reboot'])
+
 
 def list_prereq():
     print("=== Virtuozzo-specific upgrade prerequisites: ===")
