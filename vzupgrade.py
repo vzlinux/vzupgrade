@@ -94,7 +94,13 @@ def check():
     if check_blockers():
         return 1
     try:
-        subprocess.check_call(['leapp', 'preupgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
+        leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+        if cmdline.debug:
+            leapp_cmd.append('--debug')
+        elif cmdline.verbose:
+            leapp_cmd.append('--verbose')
+
+        subprocess.check_call(leapp_cmd)
     except:
         return 1
 
@@ -209,7 +215,13 @@ def install():
             if f.startswith("__db"):
                 os.remove("/var/lib/rpm/" + f)
 
-    subprocess.call(['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8'])
+    leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+    if cmdline.debug:
+        leapp_cmd.append('--debug')
+    elif cmdline.verbose:
+        leapp_cmd.append('--verbose')
+
+    subprocess.call(leapp_cmd)
 
     if cmdline.reboot:
         subprocess.call(['reboot'])
@@ -230,8 +242,10 @@ def parse_command_line():
     subparsers = parser.add_subparsers(title='command')
 
     sp = subparsers.add_parser('check', help='check upgrade prerequisites and generate upgrade scripts')
-#    sp.add_argument('--blocker', action='store_true', help='check only upgrade blockers')
-#    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
+    sp.add_argument('--blocker', action='store_true', help='check only upgrade blockers')
+    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
+    sp.add_argument('--verbose', action='store_true', help='Print all but debug log messages (info, warning, error, critical) to stderr. By default only error and critical level messages are printed.')
+    sp.add_argument('--debug', action='store_true', help='Print all available log messages (debug, info, warning, error, critical) and the output of executed commands to stderr. By default only error and critical level messages are printed.')
     sp.set_defaults(func=check)
 
     sp = subparsers.add_parser('list', help='list prerequisites for in-place upgrade')
@@ -240,11 +254,13 @@ def parse_command_line():
     sp = subparsers.add_parser('install', help='Perform upgrade')
 #    sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
 #    sp.add_argument('--add-repo', nargs='*', action='store', help='additional repository to attach during upgrade, in the "repo_id=url" format. You can specify multiple repos here')
-    sp.add_argument('--reboot', action='store_true', help='automatically reboot to start the upgrade when ready')
+    sp.add_argument('--reboot', action='store_true', help='Automatically reboot to start the upgrade when ready')
+    sp.add_argument('--verbose', action='store_true', help='Print all but debug log messages (info, warning, error, critical) to stderr. By default only error and critical level messages are printed.')
+    sp.add_argument('--debug', action='store_true', help='Print all available log messages (debug, info, warning, error, critical) and the output of executed commands to stderr. By default only error and critical level messages are printed.')
 #    sp.add_argument('--clean-cache', action='store_true', help='clean downloaded packages cache')
 #    sp.add_argument('--skip-post-update', action='store_true', help='do not run "yum update" after upgrade is performed and do not enabled readykernel autoupdate')
 #    sp.add_argument('--disable-rk-autoupdate', action='store_true', help='disable ReadyKernel autoupdate in the upgraded system (autoupdate is enabled by default)')
-#    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
+    sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
 #    src_group = sp.add_mutually_exclusive_group()
 #    src_group.add_argument('--device', action='store', help='mounted device to be used (please provide link to folder where Vz7 iso image is mounted)')
 #    src_group.add_argument('--network', action='store', help='Vz7 network repository to be used')
