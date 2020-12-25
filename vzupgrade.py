@@ -94,13 +94,19 @@ def check():
     if check_blockers():
         return 1
     try:
-        leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+        d = dict(os.environ)
+        if cmdline.skip_vz:
+            d['SKIPVZ'] = '1'
+            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vzlinux8']
+        else:
+            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+
         if cmdline.debug:
             leapp_cmd.append('--debug')
         elif cmdline.verbose:
             leapp_cmd.append('--verbose')
 
-        subprocess.check_call(leapp_cmd)
+        subprocess.check_call(leapp_cmd, env=d)
     except:
         return 1
 
@@ -215,13 +221,19 @@ def install():
             if f.startswith("__db"):
                 os.remove("/var/lib/rpm/" + f)
 
-    leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+    d = dict(os.environ)
+    if cmdline.skip_vz:
+        d['SKIPVZ'] = '1'
+        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+    else:
+        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vzlinux8']
+
     if cmdline.debug:
         leapp_cmd.append('--debug')
     elif cmdline.verbose:
         leapp_cmd.append('--verbose')
 
-    subprocess.call(leapp_cmd)
+    subprocess.call(leapp_cmd, env=d)
 
     if cmdline.reboot:
         subprocess.call(['reboot'])
