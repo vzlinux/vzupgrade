@@ -224,9 +224,9 @@ def install():
     d = dict(os.environ)
     if cmdline.skip_vz:
         d['SKIPVZ'] = '1'
-        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
-    else:
         leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vzlinux8']
+    else:
+        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
 
     if cmdline.debug:
         leapp_cmd.append('--debug')
