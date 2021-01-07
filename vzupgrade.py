@@ -233,6 +233,10 @@ def install():
     elif cmdline.verbose:
         leapp_cmd.append('--verbose')
 
+    if not cmdline.skip_vz:
+        save_configs()
+        stop_ves()
+
     subprocess.call(leapp_cmd, env=d)
 
     if cmdline.reboot:
