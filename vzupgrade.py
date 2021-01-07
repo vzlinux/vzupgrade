@@ -170,17 +170,19 @@ Force all VEs to be stopped.
 TODO: Likely we can suspend them
 '''
 def stop_ves():
-    proc = subprocess.Popen(["prlctl", "list", "-a", "-o", "status,name"], stdout=subprocess.PIPE)
-    for line in iter(proc.stdout.readline, ''):
-        if not line.startswith(b"running") and not line.startswith(b"suspended"):
+    proc = subprocess.check_output(["prlctl", "list", "-a", "-o", "status,name"])
+    for line in str(proc).split('\n'):
+        if not line.startswith("running") and not line.startswith("suspended"):
             continue
 
         (status, name) = line.split()
-        if status == b"running":
+
+        if status == "running":
             subprocess.call(['prlctl', 'stop', name])
         else:
             subprocess.call(['prlctl', 'start', name])
             subprocess.call(['prlctl', 'stop', name])
+
 
 '''
 Save different configuration parameters
