@@ -172,11 +172,11 @@ TODO: Likely we can suspend them
 def stop_ves():
     proc = subprocess.Popen(["prlctl", "list", "-a", "-o", "status,name"], stdout=subprocess.PIPE)
     for line in iter(proc.stdout.readline, ''):
-        if not line.startswith("running") and not line.startswith("suspended"):
+        if not line.startswith(b"running") and not line.startswith(b"suspended"):
             continue
 
         (status, name) = line.split()
-        if status == "running":
+        if status == b"running":
             subprocess.call(['prlctl', 'stop', name])
         else:
             subprocess.call(['prlctl', 'start', name])
