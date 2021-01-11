@@ -18,8 +18,6 @@ import re
 import fileinput
 import glob
 from shutil import copyfile
-#import yum
-#from lxml import etree
 
 '''
 Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
@@ -110,6 +108,55 @@ def check():
     except:
         return 1
 
+
+'''
+Check if templates are used that are not supported in Vz8
+'''
+def check_templates():
+    invalid_templates = {}
+    valid_templates=[
+    "centos-7-x86_64",
+    "centos-8-x86_64",
+    "debian-10.0-x86_64",
+    "debian-9.0-x86_64",
+    "debian-8.0-x86_64",
+    "debian-7.0-x86_64",
+    "ubuntu-18.04-x86_64",
+    "ubuntu-18.10-x86_64",
+    "ubuntu-19.04-x86_64",
+    "ubuntu-19.10-x86_64",
+    "ubuntu-20.04-x86_64",
+    "ubuntu-20.10-x86_64",
+    "ubuntu-21.04-x86_64",
+    "ubuntu-21.10-x86_64",
+    "sles-11-x86_64",
+    "sles-12-x86_64",
+    "sles-15-x86_64",
+    "vzlinux-7-x86_64",
+    "vzlinux-8-x86_64"
+    ]
+
+    ctids = subprocess.check_output(["vzlist", "-o", "ctid", "-a", "-H"])
+    for ct in ctids.split("\n"):
+        ct = ct.strip()
+        if not ct:
+            continue
+        tmpl = subprocess.check_output(["vzpkg", "list", ct, "--os"])
+        tmpl = tmpl.split()[0]
+        if tmpl not in valid_templates:
+            if tmpl in invalid_templates:
+                invalid_templates[tmpl].append(ct)
+            else:
+                invalid_templates[tmpl] = [ct]
+
+    if invalid_templates:
+        print("Containers found that use templates not supported by VHS 8")
+        print(invalid_templates)
+        return 1
+
+    return 0
+
+
 '''
 Explicitely launch VZ-specific preupgrade-assistant checkers
 that check for upgrade blockers
@@ -120,6 +167,9 @@ def check_blockers():
     ret = subprocess.call(['yum', 'check-update'], stdout=FNULL, stderr=FNULL)
     if ret > 0:
         print("INPLACERISK: EXTREME: You have updates available! Please install all updates first")
+
+    if not cmdline.skip_vz:
+        ret += check_templates()
 
     if ret == 0:
         print("No upgrade blockers found!")
@@ -166,8 +216,6 @@ def update_pva():
 
 '''
 Force all VEs to be stopped.
-
-TODO: Likely we can suspend them
 '''
 def stop_ves():
     proc = subprocess.check_output(["prlctl", "list", "-a", "-o", "status,name"])
@@ -196,9 +244,6 @@ def save_configs():
     iflist = open('/var/lib/vzupgrade/iflist', 'w')
     subprocess.call(['ifconfig'], stdout=iflist)
     iflist.close();
-
-    # Save dispatcher config
-#    subprocess.call(['cp', '/etc/vz/dispatcher.xml', '/var/lib/vzupgrade'])
 
     # Info about services
     chklist = open('/var/lib/vzupgrade/services', 'w')
@@ -247,8 +292,6 @@ def install():
 
 def list_prereq():
     print("=== Virtuozzo-specific upgrade prerequisites: ===")
-#    print("* No VMs exist on the host")
-#    print("* There are no containers that use VZFS")
     print("* There are no templates for OSes not supported by Vz8")
     print("* All updates are installed")
 #    print("* No Virtuozzo Automation packages are installed")
