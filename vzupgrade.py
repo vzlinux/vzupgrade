@@ -60,9 +60,22 @@ TODO:
 * check content of existing vz7 repo files - they also should have repo id expected by us
 '''
 def add_repos():
-    for repo_file in ['vz8.repo', 'vzlinux8.repo']:
-        if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
-            shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
+    # When using --skip-vz, we use a dummy vz8 repo which actually points to the same
+    # location as VzLinux8. The thing is that some packages (e.g., libvirt) are
+    # assigned to "vz8" repo in pes-events and it is easier to manipulate repos
+    # than pes-events.
+    if cmdline.skip_vz:
+        if os.path.isfile("/etc/yum.repos.d/vz8.repo"):
+            os.remove("/etc/yum.repos.d/vz8.repo")
+        for repo_file in ['vz8_dummy.repo', 'vzlinux8.repo']:
+            if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
+                shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
+    else:
+        if os.path.isfile("/etc/yum.repos.d/vz8_dummy.repo"):
+            os.remove("/etc/yum.repos.d/vz8_dummy.repo")
+        for repo_file in ['vz8.repo', 'vzlinux8.repo']:
+            if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
+                shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
 
 '''
 Put file with answers to required place.
@@ -95,9 +108,7 @@ def check():
         d = dict(os.environ)
         if cmdline.skip_vz:
             d['SKIPVZ'] = '1'
-            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vzlinux8']
-        else:
-            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+        leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
 
         if cmdline.debug:
             leapp_cmd.append('--debug')
@@ -238,11 +249,8 @@ Save different configuration parameters
 def save_configs():
     # Save info about vlans
     subprocess.call(['mkdir', '-p', '/var/lib/vzupgrade'])
-    netlist = open('/var/lib/vzupgrade/net_list', 'w')
-    subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
-    netlist.close();
     iflist = open('/var/lib/vzupgrade/iflist', 'w')
-    subprocess.call(['ifconfig'], stdout=iflist)
+    subprocess.call(['ip', 'a'], stdout=iflist)
     iflist.close();
 
     # Info about services
@@ -252,6 +260,12 @@ def save_configs():
 
     # Archive the whole /etc folder
     subprocess.call(['tar', 'czf', '/var/lib/vzupgrade/etc.tar.gz', '/etc'])
+
+    if not cmdline.skip_vz:
+        netlist = open('/var/lib/vzupgrade/net_list', 'w')
+        subprocess.call(['prlsrvctl', 'net', 'list'], stdout=netlist)
+        netlist.close();
+
 
 '''
 Actually run upgrade by means of leapp tool
@@ -271,17 +285,15 @@ def install():
     d = dict(os.environ)
     if cmdline.skip_vz:
         d['SKIPVZ'] = '1'
-        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vzlinux8']
-    else:
-        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+    leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
 
     if cmdline.debug:
         leapp_cmd.append('--debug')
     elif cmdline.verbose:
         leapp_cmd.append('--verbose')
 
+    save_configs()
     if not cmdline.skip_vz:
-        save_configs()
         stop_ves()
 
     subprocess.call(leapp_cmd, env=d)
