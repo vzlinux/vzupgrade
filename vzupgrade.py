@@ -151,6 +151,9 @@ def check_templates():
     ]
 
     ctids = subprocess.check_output(["vzlist", "-o", "ctid", "-a", "-H"])
+    if not ctids:
+        return 0
+
     for ct in ctids.split("\n"):
         ct = ct.strip()
         if not ct:
