@@ -154,12 +154,12 @@ def check_templates():
     if not ctids:
         return 0
 
-    for ct in ctids.split("\n"):
+    for ct in ctids.decode('utf-8').split("\n"):
         ct = ct.strip()
         if not ct:
             continue
         tmpl = subprocess.check_output(["vzpkg", "list", ct, "--os"])
-        tmpl = tmpl.split()[0]
+        tmpl = tmpl.decode('utf-8').split()[0]
         if tmpl not in valid_templates:
             if tmpl in invalid_templates:
                 invalid_templates[tmpl].append(ct)
