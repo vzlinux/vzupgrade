@@ -236,6 +236,9 @@ Force all VEs to be stopped.
 '''
 def stop_ves():
     proc = subprocess.check_output(["prlctl", "list", "-a", "-o", "status,name"])
+    if not proc:
+        return
+
     for line in str(proc).split('\n'):
         if not line.startswith("running") and not line.startswith("suspended"):
             continue
