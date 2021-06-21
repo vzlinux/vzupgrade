@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #
-# Copyright (c) 2017-2020 Virtuozzo International GmbH. All rights reserved.
+# Copyright (c) 2017-2021 Virtuozzo International GmbH. All rights reserved.
 #
 # Our contact details: Virtuozzo International GmbH, Vordergasse 59, 8200
 # Schaffhausen, Switzerland.
@@ -18,6 +18,9 @@ import re
 import fileinput
 import glob
 from shutil import copyfile
+
+# Partition with /var/lib folder should have at least MIN_FREE_GB free gigabytes
+MIN_FREE_GB = 3
 
 '''
 Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
@@ -131,6 +134,7 @@ def check_templates():
     valid_templates=[
     "centos-7-x86_64",
     "centos-8-x86_64",
+    "centos-8.stream-x86_64",
     "debian-10.0-x86_64",
     "debian-9.0-x86_64",
     "debian-8.0-x86_64",
@@ -147,7 +151,7 @@ def check_templates():
     "sles-12-x86_64",
     "sles-15-x86_64",
     "vzlinux-7-x86_64",
-    "vzlinux-8-x86_64"
+    "vzlinux-8.stream-x86_64"
     ]
 
     ctids = subprocess.check_output(["vzlist", "-o", "ctid", "-a", "-H"])
@@ -187,6 +191,8 @@ def check_blockers():
 
     if not cmdline.skip_vz:
         ret += check_templates()
+
+    ret += check_space()
 
     if ret == 0:
         print("No upgrade blockers found!")
@@ -313,11 +319,20 @@ def install():
     if cmdline.reboot:
         subprocess.call(['reboot'])
 
+# Check if we have enough free space
+def check_space():
+    s = os.statvfs('/var/lib')
+    f = (s.f_bavail * s.f_frsize) / 1024 /1024 / 1024
+    if f < MIN_FREE_GB:
+        print("Insufficient disk space! We need at least %d for /var/lib" % MIN_FREE_GB)
+        return 1
+    return 0
 
 def list_prereq():
     print("=== Virtuozzo-specific upgrade prerequisites: ===")
     print("* There are no templates for OSes not supported by Vz8")
     print("* All updates are installed")
+    print("* /var/lib has at least %d Gb of free space" % MIN_FREE_GB)
 #    print("* No Virtuozzo Automation packages are installed")
 
 
