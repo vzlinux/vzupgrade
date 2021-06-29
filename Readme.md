@@ -33,5 +33,7 @@ If no problems were found, then the upgrade itself:
 ```
 
 The system will be rebooted into a special mode (using "Upgrade-initramfs" initrd image).
+One can specify --reboot option to make this reboot happen automatically.
+
 Once the upgrade is finished, the system will be automatically rebooted once again
 into upgraded system.
