@@ -162,7 +162,7 @@ def check_templates():
     "sles-12-x86_64",
     "sles-15-x86_64",
     "vzlinux-7-x86_64",
-    "vzlinux-8-x86_64"
+    "vzlinux-8-x86_64",
     "vzlinux-8.stream-x86_64"
     ]
 
