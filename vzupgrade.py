@@ -142,6 +142,7 @@ Check if templates are used that are not supported in Vz8
 def check_templates():
     invalid_templates = {}
     valid_templates=[
+    "almalinux-8-x86_64",
     "centos-7-x86_64",
     "centos-8-x86_64",
     "centos-8.stream-x86_64",
@@ -161,6 +162,7 @@ def check_templates():
     "sles-12-x86_64",
     "sles-15-x86_64",
     "vzlinux-7-x86_64",
+    "vzlinux-8-x86_64"
     "vzlinux-8.stream-x86_64"
     ]
 
