@@ -93,12 +93,23 @@ def add_answers():
         copyfile("/etc/leapp/answers/" + f, "/var/log/leapp/" + f)
 
 '''
+Some kernel modules are dropped in Vz8 but can be met on Vz7.
+This will inhibit the upgrade in leapp, but some modules can be safely unloaded
+'''
+def drop_problematic_mods():
+    FNULL = open(os.devnull, 'w')
+    ret = subprocess.call(['modprobe', 'r', 'isci'], stdout=FNULL, stderr=FNULL)
+    if ret == 0:
+        print("The isci module has been unloaded to allow upgrade")
+
+'''
 Before running check or upgrade, we should put some files to proper places
 '''
 def prepare_files():
     fix_sshd_config()
     add_repos()
     add_answers()
+    drop_problematic_mods()
 
 '''
 Check upgrade prerequisites
