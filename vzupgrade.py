@@ -230,12 +230,13 @@ def get_build_hash(ver):
 '''
 Check if VA is installed
 
-TODO: Currently this is just a stub.
+Currently this is just a stub.
 
 We have va-agent installed on every node deployed via UI installer.
 However, if agent is not active then we can safely remove it
 
-But future of VA is unclear
+Current plan is to simply have the same VA built for VHS8,
+so no specific actions should be performed
 '''
 def update_pva():
     pva_detected = False
