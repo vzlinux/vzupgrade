@@ -28,6 +28,15 @@ Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
 The problem is that default is different in Vz7 and Vz8
 '''
 def fix_sshd_config():
+    with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
+        for l in f:
+            # check that PrintMotd never used
+            # and switch to "no"
+            # and don't touch it if changed
+            if l.strip().startswith("#PrintMotd"):
+                print("PrintMotd no")
+            print(l.strip())
+
     # Check if we already have explicit PermitRootLogin
     with open("/etc/ssh/sshd_config") as f:
         for l in f:
