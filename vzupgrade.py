@@ -205,6 +205,8 @@ def check_blockers():
         ret += check_templates()
 
     ret += check_space()
+    ret += check_va()
+    ret += check_storage_ui()
 
     if ret == 0:
         print("No upgrade blockers found!")
@@ -228,26 +230,34 @@ def get_build_hash(ver):
 
 
 '''
-Check if VA is installed
-
-Currently this is just a stub.
-
-We have va-agent installed on every node deployed via UI installer.
-However, if agent is not active then we can safely remove it
-
-Current plan is to simply have the same VA built for VHS8,
-so no specific actions should be performed
+Check if VA Agent is running
 '''
-def update_pva():
+def check_va():
     pva_detected = False
-    proc = subprocess.Popen(["rpm", "-qa"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["systemctl", "is-active", "va-agent"], stdout=subprocess.PIPE)
     for line in iter(proc.stdout.readline, ''):
-        if line is not None and line.startswith("va-"):
-            pva_detected = True
-            break
+        if line is not None and line.strip() == "active":
+            print("You have VA agent service running.")
+            print("There is no VA in VHS 8, you won't be able to control the node via VA after upgrade.")
+            print("Please unregister the node or at least stop va-agent service before the upgrade.")
+            return 1
 
-    if pva_detected:
-        print("VA detected")
+    return 0
+
+'''
+Check if Storage UI Agent is running
+'''
+def check_storage_ui():
+    pva_detected = False
+    proc = subprocess.Popen(["systemctl", "is-active", "vstorage-ui-agent"], stdout=subprocess.PIPE)
+    for line in iter(proc.stdout.readline, ''):
+        if line is not None and line.strip() == "active":
+            print("You have Storage UI agent service running.")
+            print("There is no Storage UI in VHS 8, you won't be able to control the node via UI after upgrade.")
+            print("Please unregister the node or at least stop vstorage-ui-agent service before the upgrade.")
+            return 1
+
+    return 0
 
 
 '''
