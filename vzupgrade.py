@@ -256,7 +256,7 @@ def check_va():
     try:
         proc = subprocess.check_output(["systemctl", "is-active", "va-agent"])
     except:
-        pass
+        return 0
     for line in proc.split():
         if line is not None and line.decode('utf-8').strip() == "active":
             print("You have VA agent service running.")
