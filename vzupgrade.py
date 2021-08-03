@@ -25,9 +25,19 @@ MIN_FREE_GB = 3
 '''
 Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
 
-The problem is that default is different in Vz7 and Vz8
+The problem is that default is different in Vz7 and Vz8.
+
+In addition, comment out the ciphers section - it can contain
+old algorithms used for migrating VMs from Vz6 to Vz7
 '''
 def fix_sshd_config():
+    # First, comment out ciphers
+    with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
+        for l in f:
+            if l.startswith("ciphers "):
+                l = '# ' + l
+            print(l.strip())
+
     with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
         for l in f:
             # check that PrintMotd never used
@@ -243,9 +253,12 @@ Check if VA Agent is running
 '''
 def check_va():
     pva_detected = False
-    proc = subprocess.Popen(["systemctl", "is-active", "va-agent"], stdout=subprocess.PIPE)
-    for line in iter(proc.stdout.readline, ''):
-        if line is not None and line.strip() == "active":
+    try:
+        proc = subprocess.check_output(["systemctl", "is-active", "va-agent"])
+    except:
+        pass
+    for line in proc.split():
+        if line is not None and line.decode('utf-8').strip() == "active":
             print("You have VA agent service running.")
             print("There is no VA in VHS 8, you won't be able to control the node via VA after upgrade.")
             print("Please unregister the node or at least stop va-agent service before the upgrade.")
@@ -258,9 +271,13 @@ Check if Storage UI Agent is running
 '''
 def check_storage_ui():
     pva_detected = False
-    proc = subprocess.Popen(["systemctl", "is-active", "vstorage-ui-agent"], stdout=subprocess.PIPE)
-    for line in iter(proc.stdout.readline, ''):
-        if line is not None and line.strip() == "active":
+    try:
+        proc = subprocess.check_output(["systemctl", "is-active", "vstorage-ui-agent"])
+    except:
+        # No service - no problems
+        return 0
+    for line in proc.split():
+        if line is not None and line.decode('utf-8').strip() == "active":
             print("You have Storage UI agent service running.")
             print("There is no Storage UI in VHS 8, you won't be able to control the node via UI after upgrade.")
             print("Please unregister the node or at least stop vstorage-ui-agent service before the upgrade.")
