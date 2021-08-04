@@ -38,14 +38,21 @@ def fix_sshd_config():
                 l = '# ' + l
             print(l.strip())
 
-    with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
+    # Check if we already have explicit PrintMotd
+    need_motd_fix = True
+    with open("/etc/ssh/sshd_config") as f:
         for l in f:
-            # check that PrintMotd never used
-            # and switch to "no"
-            # and don't touch it if changed
-            if l.strip().startswith("#PrintMotd"):
-                print("PrintMotd no")
-            print(l.strip())
+            if l.strip().startswith("PrintMotd"):
+                need_motd_fix = False
+                break
+
+    if need_motd_fix:
+        with fileinput.input(files=('/etc/ssh/sshd_config'), inplace=True) as f:
+            for l in f:
+                # default config in Vz7 should have commented PrintMotd
+                if l.strip().startswith("#PrintMotd"):
+                    print("PrintMotd no")
+                print(l.strip())
 
     # Check if we already have explicit PermitRootLogin
     with open("/etc/ssh/sshd_config") as f:
