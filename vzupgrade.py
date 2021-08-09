@@ -22,6 +22,11 @@ from shutil import copyfile
 # Partition with /var/lib folder should have at least MIN_FREE_GB free gigabytes
 MIN_FREE_GB = 3
 
+# Folders with custom pre-install and pre-check scripts
+PRECHECK_DIR='/usr/share/vzupgrade/pre-check'
+PREINST_DIR='/usr/share/vzupgrade/pre-install'
+
+
 '''
 Check if sshd_config has explicit PermitRootLogin. Set to 'yes' if it doesn't.
 
@@ -137,10 +142,35 @@ def prepare_files():
     drop_problematic_mods()
 
 '''
+Run custom pre-check scripts
+'''
+def run_precheck_hooks():
+    if not os.path.isdir(PRECHECK_DIR):
+        return
+    for f in os.listdir(PRECHECK_DIR):
+        if os.access(os.path.join(PRECHECK_DIR, file), os.X_OK):
+            subprocess.call(os.path.join(PRECHECK_DIR, f))
+
+
+
+
+'''
+Run custom pre-install scripts
+'''
+def run_preinstall_hooks():
+    if not os.path.isdir(PREINST_DIR):
+        return
+    for f in os.listdir(PREINST_DIR):
+        if os.access(os.path.join(PREINST_DIR, file), os.X_OK):
+            subprocess.call(os.path.join(PREINST_DIR, f))
+
+
+'''
 Check upgrade prerequisites
 '''
 def check():
     prepare_files()
+    run_precheck_hooks()
     if check_blockers():
         return 1
     try:
@@ -346,6 +376,8 @@ def install():
     prepare_files()
     if check_blockers():
         return 1
+
+    run_preinstall_hooks()
 
     # Clean up rpm __db* files - they can break update process
     for root, dirs, files in os.walk('/var/lib/rpm/__db*'):

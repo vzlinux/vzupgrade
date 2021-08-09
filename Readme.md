@@ -37,3 +37,14 @@ One can specify --reboot option to make this reboot happen automatically.
 
 Once the upgrade is finished, the system will be automatically rebooted once again
 into upgraded system.
+
+The tool supports launching custom scripts before the check and before the upgrade phases.
+All executable files found inside the /usr/share/vzupgrade/pre-check folder will be launched
+just before the check, and all executable files found inside the /usr/share/vzupgrade/pre-install
+folder will be launched just before the upgrade stage starts.
+
+Note that we don't expect these custom scripts to print anything on the screen. They should use
+their own log files if needed.
+
+Also make sure that it is possible that user will launch 'check' or 'install' multiple times.
+The custom scripts should be ready for this.
