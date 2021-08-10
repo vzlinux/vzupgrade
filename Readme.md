@@ -1,6 +1,6 @@
 vzupgrade tool can be used to upgrade VHS 7 to 8 and CentOS 7 to VzLinux 8.
 
-Normally, the vzupgrade script shouldbe installed via the RPM package from VzLinux repos:
+Normally, the vzupgrade script should be installed via the RPM package from VzLinux repos:
 
 ```sh
  yum install -y yum-utils
@@ -14,7 +14,7 @@ Make sure to disable the VzLinux repo before real upgrade
  rm -f /etc/yum.repos.d/repo.virtuozzo*
 ```
 
-Before running vzupgrade, installall CentOS updates:
+Before running vzupgrade, install all CentOS updates:
 
 ```sh
  yum update -y
@@ -26,7 +26,7 @@ Now run the pre-upgrade check, for CentOS one should use "--skip-vz" option:
  vzupgrade check --skip-vz
 ```
 
-If no problems were found, then the upgrade itself:
+If no problems were found, run the upgrade itself:
 
 ```sh
  vzupgrade install --skip-vz
