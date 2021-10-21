@@ -173,6 +173,11 @@ def check():
     run_precheck_hooks()
     if check_blockers():
         return 1
+
+    # Should we only check blockers?
+    if cmdline.blocker:
+        return 0
+
     try:
         d = dict(os.environ)
         if cmdline.skip_vz:
