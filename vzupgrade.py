@@ -230,7 +230,7 @@ def check_templates():
         ct = ct.strip()
         if not ct:
             continue
-        tmpl = subprocess.check_output(["vzpkg", "list", ct, "--os"])
+        tmpl = subprocess.check_output(["vzpkg", "list", ct, "-q", "--os"])
         tmpl = tmpl.decode('utf-8').split()[0]
         if tmpl not in valid_templates:
             if tmpl in invalid_templates:
