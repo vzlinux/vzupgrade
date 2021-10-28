@@ -147,7 +147,7 @@ Run custom pre-check scripts
 def run_precheck_hooks():
     if not os.path.isdir(PRECHECK_DIR):
         return
-    for f in os.listdir(PRECHECK_DIR):
+    for f in sorted(os.listdir(PRECHECK_DIR)):
         if os.access(os.path.join(PRECHECK_DIR, f), os.X_OK):
             subprocess.call(os.path.join(PRECHECK_DIR, f))
 
@@ -160,7 +160,7 @@ Run custom pre-install scripts
 def run_preinstall_hooks():
     if not os.path.isdir(PREINST_DIR):
         return
-    for f in os.listdir(PREINST_DIR):
+    for f in sorted(os.listdir(PREINST_DIR)):
         if os.access(os.path.join(PREINST_DIR, f), os.X_OK):
             subprocess.call(os.path.join(PREINST_DIR, f))
 

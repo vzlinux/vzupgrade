@@ -45,6 +45,9 @@ All executable files found inside the **/usr/share/vzupgrade/pre-check** folder 
 just before the check, and all executable files found inside the **/usr/share/vzupgrade/pre-install**
 folder will be launched just before the upgrade stage starts.
 
+The scripts are executed in the alphabetical order, so we recommend to add a numeric prefix to
+every script indicating its launch order, e.g. "01-prepare", "02-"almost-ready", etc.
+
 Note that we don't expect these custom scripts to print anything on the screen. They should use
 their own log files if needed.
 
