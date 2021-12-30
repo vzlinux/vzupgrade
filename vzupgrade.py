@@ -187,9 +187,18 @@ def check():
         d = dict(os.environ)
         if cmdline.skip_vz:
             d['SKIPVZ'] = '1'
+        if os.path.exists("/etc/leapp/files/repomap.csv"):
+            os.unlink("/etc/leapp/files/repomap.csv")
+        if os.path.exists("/etc/leapp/files/pes-events.json"):
+            os.unlink("/etc/leapp/files/pes-events.json")
+
         if cmdline.use_vz9:
+            os.link("/etc/leapp/files/repomap-vz9.csv", "/etc/leapp/files/repomap.csv")
+            os.link("/etc/leapp/files/pes-events-vz9.json", "/etc/leapp/files/pes-events.json")
             leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz9', '--enablerepo=vzlinux9']
         else:
+            os.link("/etc/leapp/files/repomap-vz8.csv", "/etc/leapp/files/repomap.csv")
+            os.link("/etc/leapp/files/pes-events-vz8.json", "/etc/leapp/files/pes-events.json")
             leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
         if cmdline.enablerepo:
             for repo in cmdline.enablerepo:
@@ -403,9 +412,19 @@ def install():
     d = dict(os.environ)
     if cmdline.skip_vz:
         d['SKIPVZ'] = '1'
+
+    if os.path.exists("/etc/leapp/files/repomap.csv"):
+        os.unlink("/etc/leapp/files/repomap.csv")
+    if os.path.exists("/etc/leapp/files/pes-events.json"):
+        os.unlink("/etc/leapp/files/pes-events.json")
+
     if cmdline.use_vz9:
+        os.link("/etc/leapp/files/repomap-vz9.csv", "/etc/leapp/files/repomap.csv")
+        os.link("/etc/leapp/files/pes-events-vz9.json", "/etc/leapp/files/pes-events.json")
         leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz9', '--enablerepo=vzlinux9']
     else:
+        os.link("/etc/leapp/files/repomap-vz8.csv", "/etc/leapp/files/repomap.csv")
+        os.link("/etc/leapp/files/pes-events-vz8.json", "/etc/leapp/files/pes-events.json")
         leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
     if cmdline.enablerepo:
         for repo in cmdline.enablerepo:
