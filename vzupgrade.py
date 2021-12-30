@@ -98,16 +98,21 @@ def add_repos():
     # location as VzLinux8. The thing is that some packages (e.g., libvirt) are
     # assigned to "vz8" repo in pes-events and it is easier to manipulate repos
     # than pes-events.
+    if cmdline.use_vz9:
+        suf = '9'
+    else:
+        suf = '8'
+
     if cmdline.skip_vz:
-        if os.path.isfile("/etc/yum.repos.d/vz8.repo"):
-            os.remove("/etc/yum.repos.d/vz8.repo")
-        for repo_file in ['vz8_dummy.repo', 'vzlinux8.repo']:
+        if os.path.isfile("/etc/yum.repos.d/vz" + suf + ".repo"):
+            os.remove("/etc/yum.repos.d/vz" + suf + ".repo")
+        for repo_file in ["vz" + suf + "_dummy.repo", "vzlinux" + suf + ".repo"]:
             if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
                 shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
     else:
-        if os.path.isfile("/etc/yum.repos.d/vz8_dummy.repo"):
-            os.remove("/etc/yum.repos.d/vz8_dummy.repo")
-        for repo_file in ['vz8.repo', 'vzlinux8.repo']:
+        if os.path.isfile("/etc/yum.repos.d/vz" + suf + "_dummy.repo"):
+            os.remove("/etc/yum.repos.d/vz" + suf + "_dummy.repo")
+        for repo_file in ["vz" + suf + ".repo", "vzlinux" + suf + ".repo"]:
             if not os.path.isfile("/etc/yum.repos.d/" + repo_file):
                 shutil.copyfile("/usr/share/vzupgrade/" + repo_file, "/etc/yum.repos.d/" + repo_file)
 
@@ -182,7 +187,10 @@ def check():
         d = dict(os.environ)
         if cmdline.skip_vz:
             d['SKIPVZ'] = '1'
-        leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+        if cmdline.use_vz9:
+            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz9', '--enablerepo=vzlinux9']
+        else:
+            leapp_cmd = ['leapp', 'preupgrade', '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
         if cmdline.enablerepo:
             for repo in cmdline.enablerepo:
                 leapp_cmd.append('--enablerepo=' + repo)
@@ -207,10 +215,10 @@ def check_templates():
     "centos-7-x86_64",
     "centos-8-x86_64",
     "centos-8.stream-x86_64",
+    "centos-9.stream-x86_64",
+    "debian-11.0-x86_64",
     "debian-10.0-x86_64",
     "debian-9.0-x86_64",
-    "debian-8.0-x86_64",
-    "debian-7.0-x86_64",
     "ubuntu-18.04-x86_64",
     "ubuntu-18.10-x86_64",
     "ubuntu-19.04-x86_64",
@@ -225,6 +233,8 @@ def check_templates():
     "vzlinux-7-x86_64",
     "vzlinux-8-x86_64",
     "vzlinux-8.stream-x86_64"
+    "vzlinux-9-x86_64",
+    "vzlinux-9.stream-x86_64"
     ]
 
     ctids = subprocess.check_output(["vzlist", "-o", "ctid", "-a", "-H"])
@@ -393,7 +403,10 @@ def install():
     d = dict(os.environ)
     if cmdline.skip_vz:
         d['SKIPVZ'] = '1'
-    leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
+    if cmdline.use_vz9:
+        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz9', '--enablerepo=vzlinux9']
+    else:
+        leapp_cmd = ['leapp', 'upgrade',  '--no-rhsm', '--enablerepo=vz8', '--enablerepo=vzlinux8']
     if cmdline.enablerepo:
         for repo in cmdline.enablerepo:
             leapp_cmd.append('--enablerepo=' + repo)
@@ -437,6 +450,7 @@ def parse_command_line():
     sp = subparsers.add_parser('check', help='check upgrade prerequisites and generate upgrade scripts')
     sp.add_argument('--blocker', action='store_true', help='check only upgrade blockers')
     sp.add_argument('--skip-vz', action='store_true', help='Skip VZ-specific actions')
+    sp.add_argument('--use-vz9', action='store_true', help='Upgrade directly to VHS 9')
     sp.add_argument('--enablerepo', nargs='*', action='store', help='id of additional repository to attach during upgrade. You can specify multiple repos here, e.g. "--enablerepo r1 r2 r3". Repositories should be already present in yum configuration files')
     sp.add_argument('--verbose', action='store_true', help='Print all but debug log messages (info, warning, error, critical) to stderr. By default only error and critical level messages are printed.')
     sp.add_argument('--debug', action='store_true', help='Print all available log messages (debug, info, warning, error, critical) and the output of executed commands to stderr. By default only error and critical level messages are printed.')
@@ -448,6 +462,7 @@ def parse_command_line():
     sp = subparsers.add_parser('install', help='Perform upgrade')
 #    sp.add_argument('--boot', action='store', help='install bootloader to a specified device')
 #    sp.add_argument('--add-repo', nargs='*', action='store', help='additional repository to attach during upgrade, in the "repo_id=url" format. You can specify multiple repos here')
+    sp.add_argument('--use-vz9', action='store_true', help='Upgrade directly to VHS 9')
     sp.add_argument('--enablerepo', nargs='*', action='store', help='id of additional repository to attach during upgrade. You can specify multiple repos here, e.g. "--enablerepo r1 r2 r3". Repositories should be already present in yum configuration files')
     sp.add_argument('--reboot', action='store_true', help='Automatically reboot to start the upgrade when ready')
     sp.add_argument('--verbose', action='store_true', help='Print all but debug log messages (info, warning, error, critical) to stderr. By default only error and critical level messages are printed.')

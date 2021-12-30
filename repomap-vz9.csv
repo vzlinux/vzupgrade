@@ -1,0 +1,10 @@
+VZ 7 repoid,VZ 9 repoid in CDN,VZ 9 repo name in PES,VZ 7 minor versions,VZ 9 minor versions,architecture,type(rpm/srpm/debuginfo),source product type (ga/beta,htb),target product type (ga/beta/htb)
+
+# Version: 1
+# Date: 20211229
+
+# x86_64
+virtuozzo-os,vz9,vz9,all,all,x86_64,rpm,ga,ga
+virtuozzo-updates,vz9,vz9,all,all,x86_64,rpm,ga,ga
+virtuozzolinux-base,vzlinux9,vzlinux9,all,all,x86_64,rpm,ga,ga
+virtuozzolinux-updates,vzlinux9,vzlinux9,all,all,x86_64,rpm,ga,ga

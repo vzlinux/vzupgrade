@@ -1,0 +1,8 @@
+[vz9]
+name=Vz9 Dummy
+mirrorlist=http://repo.virtuozzo.com/vzlinux/mirrorlist/mirrors-9-os
+#baseurl=http://repo.virtuozzo.com/vzlinux/9/$basearch/os/
+enabled=0
+gpgcheck=1
+priority=90
+gpgkey=file:///etc/pki/rpm-gpg/VZLINUX_GPG_KEY file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Virtuozzo-9

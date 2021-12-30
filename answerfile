@@ -3,7 +3,7 @@
 # Reason:             Confirmation
 # =================== remove_pam_pkcs11_module_check.confirm ==================
 # Label:              Disable pam_pkcs11 module in PAM configuration? If no, the upgrade process will be interrupted.
-# Description:        PAM module pam_pkcs11 is no longer available in Vz8 since it was replaced by SSSD.
+# Description:        PAM module pam_pkcs11 is no longer available in new Vz products since it was replaced by SSSD.
 # Type:               bool
 # Default:            None
 # Available choices: True/False
