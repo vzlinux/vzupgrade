@@ -26,11 +26,25 @@ Now run the pre-upgrade check, for CentOS one should use "--skip-vz" option:
  vzupgrade check --skip-vz
 ```
 
-If no problems were found, run the upgrade itself:
+For upgrading VHS 7 to VHS 9, one should use "--use-vz9" option:
+
+```sh
+ vzupgrade check --use-vz9
+```
+
+
+If no problems were found, run the upgrade itself. For CentOS 8 to VzLinux 8:
 
 ```sh
  vzupgrade install --skip-vz
 ```
+
+Or for upgrading VHS 7 to VHS 9:
+
+```sh
+ vzupgrade check --use-vz9
+```
+
 
 The system will be rebooted into a special mode (using "Upgrade-initramfs" initrd image).
 One can specify --reboot option to make this reboot happen automatically.
