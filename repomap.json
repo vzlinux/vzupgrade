@@ -1,0 +1,110 @@
+{
+    "datetime": "202204020934Z",
+    "version_format": "1.0.0",
+    "mapping": [
+        {
+            "source_major_version": "7",
+            "target_major_version": "8",
+            "entries": [
+                {
+                    "source": "virtuozzo-os",
+                    "target": [
+                        "vz9"
+                    ]
+                },
+                {
+                    "source": "virtuozzo-updates",
+                    "target": [
+                        "vz9"
+                    ]
+                },
+                {
+                    "source": "virtuozzolinux-base",
+                    "target": [
+                        "vzlinux9"
+                    ]
+                },
+                {
+                    "source": "virtuozzolinux-updates",
+                    "target": [
+                        "vzlinux9"
+                    ]
+                }
+            ]
+        }
+    ],
+    "repositories": [
+        {
+            "pesid": "virtuozzo-os",
+            "entries": [
+                {
+                    "major_version": "7",
+                    "arch": "x86_64",
+                    "repoid": "virtuozzo-os",
+                    "repo_type": "rpm",
+                    "channel": "ga"
+                }
+            ]
+        },
+        {
+            "pesid": "vz9",
+            "entries": [
+                {
+                    "major_version": "8",
+                    "repoid": "vz9",
+                    "arch": "x86_64",
+                    "repo_type": "rpm",
+                    "channel": "ga"
+                }
+            ]
+        },
+        {
+            "pesid": "virtuozzo-updates",
+            "entries": [
+                {
+                    "major_version": "7",
+                    "arch": "x86_64",
+                    "repo_type": "rpm",
+                    "repoid": "virtuozzo-updates",
+                    "channel": "ga"
+                }
+            ]
+        },
+        {
+            "pesid": "virtuozzolinux-base",
+            "entries": [
+                {
+                    "major_version": "7",
+                    "arch": "x86_64",
+                    "repoid": "virtuozzolinux-base",
+                    "repo_type": "rpm",
+                    "channel": "ga"
+                }
+            ]
+        },
+        {
+            "pesid": "vzlinux9",
+            "entries": [
+                {
+                    "major_version": "8",
+                    "arch": "x86_64",
+                    "repo_type": "rpm",
+                    "channel": "ga",
+                    "repoid": "vzlinux9"
+                }
+            ]
+        },
+        {
+            "pesid": "virtuozzolinux-updates",
+            "entries": [
+                {
+                    "major_version": "7",
+                    "arch": "x86_64",
+                    "repoid": "virtuozzolinux-updates",
+                    "repo_type": "rpm",
+                    "channel": "ga"
+                }
+            ]
+        }
+    ]
+}
